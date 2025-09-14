@@ -1,0 +1,20 @@
+<!-- nav.html -->
+<nav class="main-nav">
+    <div class="nav-wrapper">
+        <a href="{% url 'lista_noticias' %}" class="nav-link {% if request.resolver_match.url_name == 'lista' %}active{% endif %}">
+            <i class="fas fa-home"></i> Inicio
+        </a>
+        <a href="{% url 'politica' %}" class="nav-link {% if request.resolver_match.url_name == 'politica' %}active{% endif %}">
+            <i class="fas fa-landmark"></i> Política
+        </a>
+        <a href="{% url 'economia' %}" class="nav-link {% if request.resolver_match.url_name == 'economia' %}active{% endif %}">
+            <i class="fas fa-chart-line"></i> Economía
+        </a>
+        <a href="{% url 'mundo' %}" class="nav-link {% if request.resolver_match.url_name == 'mundo' %}active{% endif %}">
+            <i class="fas fa-globe"></i> Mundo
+        </a>
+        <a href="{% url 'tecnologia' %}" class="nav-link {% if request.resolver_match.url_name == 'tecnologia' %}active{% endif %}">
+            <i class="fas fa-laptop"></i> Tecnología
+        </a>
+    </div>
+</nav>

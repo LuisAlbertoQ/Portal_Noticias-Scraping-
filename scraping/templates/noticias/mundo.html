@@ -1,0 +1,119 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noticias El Comercio - Portal de Noticias Mundo</title>
+
+    <!-- CSS externos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- CSS propio -->
+    <link rel="stylesheet" href="{% static 'css/noticias.css' %}">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fa-solid fa-globe"></i>
+                <h1>Mundo</h1>
+            </div>
+            <div class="stats">
+                <div><i class="fas fa-newspaper"></i> {{ noticias.count }} noticias</div>
+                <div><i class="fas fa-clock"></i> Actualizado hoy</div>
+                <div><i class="fas fa-users"></i> Portal de Noticias</div>
+            </div>
+            {% include 'nav.html' %}
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="filter-bar">
+            <div class="filter-item">
+                <i class="fas fa-filter"></i>
+                <span>Filtrar por:</span>
+            </div>
+            <div class="filter-item">
+                <i class="fas fa-calendar"></i>
+                <span>Últimas 24 horas</span>
+            </div>
+            <div class="filter-item">
+                <i class="fas fa-image"></i>
+                <span>Con imágenes: {{ noticias|length }}</span>
+            </div>
+            <button class="refresh-btn" onclick="window.location.reload()">
+                <i class="fas fa-sync-alt"></i> Actualizar
+            </button>
+            <button class="refresh-btn" id="scraping-mundo-btn">
+                <i class="fas fa-robot"></i> Scraping
+            </button>
+        </div>
+
+        {% if noticias %}
+            <div class="news-grid">
+                {% for noticia in noticias %}
+                <article class="news-card fade-in" style="animation-delay: {{ forloop.counter0|add:1|floatformat:1 }}s">
+                    <div class="image-container">
+                        {% if noticia.imagen %}
+                            <img src="{{ noticia.imagen }}"
+                                 alt="{{ noticia.titulo }}"
+                                 class="news-image"
+                                 loading="lazy"
+                                 onerror="this.parentElement.innerHTML='<div class=\'image-placeholder\'><i class=\'fas fa-image\'></i></div>'">
+                        {% else %}
+                            <div class="image-placeholder"><i class="fas fa-image"></i></div>
+                        {% endif %}
+                    </div>
+
+                    <div class="card-content">
+                        <h2 class="news-title">{{ noticia.titulo }}</h2>
+
+                        <div class="news-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-user"></i>
+                                <span>{{ noticia.autor|default:"Redacción" }}</span>
+                            </div>
+                            {% if noticia.fecha %}
+                            <div class="meta-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>{{ noticia.fecha|date:"d/m/Y H:i" }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="news-actions">
+                            {% if noticia.enlace %}
+                                <a href="{{ noticia.enlace }}" target="_blank" class="read-more">
+                                    Leer más <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            {% else %}
+                                <a href="#" class="read-more" onclick="alert('Enlace no disponible'); return false;">
+                                    Ver noticia <i class="fas fa-eye"></i>
+                                </a>
+                            {% endif %}
+
+                            <button class="share-btn" onclick="compartirNoticia('{{ noticia.titulo|escapejs }}', '{{ noticia.enlace|default:''|escapejs }}')">
+                                <i class="fas fa-share"></i>
+                            </button>
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-news">
+                <i class="fas fa-newspaper"></i>
+                <h2>No hay noticias disponibles</h2>
+                <p>Ejecuta el comando de scraping para obtener las últimas noticias.</p>
+                <button class="refresh-btn" onclick="window.location.reload()" style="margin-top:20px">
+                    <i class="fas fa-sync-alt"></i> Recargar página
+                </button>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- JS propio -->
+    <script src="{% static 'js/noticias.js' %}"></script>
+</body>
+</html>
