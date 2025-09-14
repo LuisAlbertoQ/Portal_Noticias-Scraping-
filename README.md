@@ -10,7 +10,6 @@ Este proyecto es un **agregador de noticias inteligente** que:
 - **Categoriza las noticias** en: Política, Economía, Mundo, Tecnología
 - **Almacena** títulos, autores, fechas, imágenes y enlaces en base de datos
 - **Presenta** las noticias en una interfaz web moderna y responsive
-- **Permite filtrar** por fecha, búsqueda de texto y presencia de imágenes
 - **Ejecuta scraping** manual o programado por categorías específicas
 
 ## 🛠️ Tecnologías Utilizadas
