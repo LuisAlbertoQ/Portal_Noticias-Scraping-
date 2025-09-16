@@ -5,6 +5,7 @@ from playwright.sync_api import sync_playwright
 from datetime import datetime
 from urllib.parse import urljoin
 import re
+from django.utils import timezone
 
 BASE_URL = "https://elcomercio.pe/politica"
 
@@ -193,9 +194,12 @@ class Command(BaseCommand):
 
                         try:
                             fecha_str = noticia.locator("time").get_attribute("datetime", timeout=5000)
-                            fecha = datetime.fromisoformat(fecha_str.replace("Z", "+00:00")) if fecha_str else None
+                            if fecha_str:
+                                fecha = datetime.fromisoformat(fecha_str.replace("Z", "+00:00"))
+                            else:
+                                fecha = timezone.localtime(timezone.now())  # fecha actual en Lima
                         except:
-                            fecha = None
+                            fecha = timezone.localtime(timezone.now())  # fallback
 
                         imagen = self.obtener_imagen_elcomercio(noticia)
                         enlace = self.obtener_enlace_noticia(noticia)
