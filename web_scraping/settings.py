@@ -133,3 +133,14 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Celery
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_TIMEZONE = 'America/Lima'          # tu zona horaria
+CELERY_BEAT_SCHEDULE = {
+    'scrape-all-every-60-min': {
+        'task': 'scraping.tasks.scrape_all_sections',
+        'schedule': 60 * 60.0,            # segundos → cada 1 h
+    },
+}

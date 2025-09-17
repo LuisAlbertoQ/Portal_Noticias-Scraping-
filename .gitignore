@@ -39,3 +39,11 @@ scraping/static/js/*.map
 
 # Otros
 node_modules/
+
+# Redis dump
+dump.rdb
+
+# Celery Beat schedule
+celerybeat-schedule
+celerybeat-schedule-shm
+celerybeat-schedule-wal
