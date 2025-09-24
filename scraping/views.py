@@ -15,7 +15,7 @@ def lista_noticias(request):
     busqueda = request.GET.get('q', '')
     
     # Query base
-    noticias = Noticia.objects.all()
+    noticias = Noticia.objects.filter(Q(origen="elcomercio") | Q(origen="desconocido"))
     
     # Filtrar por búsqueda
     if busqueda:
@@ -80,7 +80,7 @@ def politica(request):
     busqueda = request.GET.get('q', '')
 
     # 🔹 Solo noticias de política
-    noticias = Noticia.objects.filter(enlace__icontains="/politica/")
+    noticias = Noticia.objects.filter(Q(origen="elcomercio") | Q(origen="desconocido"), enlace__icontains="/politica/")
 
     if busqueda:
         noticias = noticias.filter(
@@ -140,7 +140,7 @@ def economia(request):
     busqueda = request.GET.get('q', '')
 
     # 🔹 Solo noticias de economia
-    noticias = Noticia.objects.filter(enlace__icontains="/economia/")
+    noticias = Noticia.objects.filter(Q(origen="elcomercio") | Q(origen="desconocido"), enlace__icontains="/economia/")
 
     if busqueda:
         noticias = noticias.filter(
@@ -200,7 +200,7 @@ def mundo(request):
     busqueda = request.GET.get('q', '')
 
     # 🔹 Solo noticias de mundo
-    noticias = Noticia.objects.filter(enlace__icontains="/mundo/")
+    noticias = Noticia.objects.filter(Q(origen="elcomercio") | Q(origen="desconocido"), enlace__icontains="/mundo/")
 
     if busqueda:
         noticias = noticias.filter(
@@ -260,7 +260,7 @@ def tecnologia(request):
     busqueda = request.GET.get('q', '')
 
     # 🔹 Solo noticias de tecnologia
-    noticias = Noticia.objects.filter(enlace__icontains="/tecnologia/")
+    noticias = Noticia.objects.filter(Q(origen="elcomercio") | Q(origen="desconocido"), enlace__icontains="/tecnologia/")
 
     if busqueda:
         noticias = noticias.filter(
@@ -312,3 +312,58 @@ def ejecutar_scraping_tecnologia(request):
         except Exception as e:
             return JsonResponse({"status": "error", "error": str(e)})
     return JsonResponse({"status": "error", "error": "Método no permitido"})
+
+'''
+PERU21
+'''
+#Lista todas las noticias con filtros y estadísticas
+def peru21(request):
+    # Filtros
+    filtro_imagen = request.GET.get('con_imagen', False)
+    filtro_fecha = request.GET.get('fecha', 'todas')
+    busqueda = request.GET.get('q', '')
+    
+    # Query base
+    noticias = Noticia.objects.filter(origen='peru21')
+    
+    # Filtrar por búsqueda
+    if busqueda:
+        noticias = noticias.filter(
+            Q(titulo__icontains=busqueda) | 
+            Q(autor__icontains=busqueda)
+        )
+    
+    # Filtrar por imagen
+    if filtro_imagen:
+        noticias = noticias.exclude(imagen__isnull=True).exclude(imagen='')
+    
+    # Filtrar por fecha
+    if filtro_fecha == 'hoy':
+        hoy = timezone.now().date()
+        noticias = noticias.filter(fecha__date=hoy)
+    elif filtro_fecha == 'semana':
+        hace_una_semana = timezone.now() - timedelta(days=7)
+        noticias = noticias.filter(fecha__gte=hace_una_semana)
+    elif filtro_fecha == 'mes':
+        hace_un_mes = timezone.now() - timedelta(days=30)
+        noticias = noticias.filter(fecha__gte=hace_un_mes)
+    
+    # Ordenar por fecha
+    noticias = noticias.order_by('-fecha', '-fecha_scraping')
+    
+    # Estadísticas
+    total_noticias = noticias.count()
+    noticias_con_imagen = noticias.exclude(imagen__isnull=True).exclude(imagen='').count()
+    
+    context = {
+        'noticias': noticias,
+        'total_noticias': total_noticias,
+        'noticias_con_imagen': noticias_con_imagen,
+        'filtro_actual': {
+            'imagen': filtro_imagen,
+            'fecha': filtro_fecha,
+            'busqueda': busqueda
+        }
+    }
+    
+    return render(request, 'peru21/peru21.html', context)

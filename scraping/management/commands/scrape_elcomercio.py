@@ -307,6 +307,7 @@ class Command(BaseCommand):
                         
                         noticia, created = Noticia.objects.get_or_create(
                             titulo=titulo,
+                            origen='elcomercio',
                             defaults={
                                 'autor': autor,
                                 'fecha': data['fecha'],
