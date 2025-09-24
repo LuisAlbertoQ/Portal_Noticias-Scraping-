@@ -8,3 +8,4 @@ def scrape_all_sections():
     call_command('scrape_elcomercio_pol')
     call_command('scrape_mundo')
     call_command('scrape_tecnologia')
+    call_command('scrape_peru21')
