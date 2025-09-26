@@ -1,16 +1,19 @@
-/* ===== VARIABLES CSS ===== */
+/* ===== VARIABLES CSS - COLORES ORIGINALES ===== */
 :root {
-    --primary-color: #3498db;
-    --secondary-color: #2c3e50;
-    --accent-color: #e74c3c;
-    --success-color: #27ae60;
-    --text-color: #2c3e50;
-    --text-muted: #7f8c8d;
-    --bg-light: #f8f9fa;
+    --primary-color: #3498db;      /* Azul original */
+    --secondary-color: #2c3e50;    /* Azul marino oscuro */
+    --accent-color: #e74c3c;       /* Rojo original */
+    --success-color: #27ae60;      /* Verde original */
+    --text-color: #2c3e50;         /* Azul marino para texto */
+    --text-muted: #7f8c8d;         /* Gris medio */
+    --bg-light: #f8f9fa;           /* Gris muy claro */
     --bg-white: #ffffff;
-    --shadow-light: 0 5px 15px rgba(0,0,0,0.08);
-    --shadow-medium: 0 10px 30px rgba(0,0,0,0.1);
-    --shadow-heavy: 0 20px 40px rgba(0,0,0,0.15);
+    --primary-gradient: linear-gradient(135deg, #3498db 0%, #2980b9 50%, #1abc9c 100%);
+    --dark-primary: #2980b9;       /* Azul más oscuro */
+    --light-primary: #85c1e9;      /* Azul muy claro */
+    --shadow-light: 0 5px 15px rgba(52, 152, 219, 0.1);
+    --shadow-medium: 0 10px 30px rgba(52, 152, 219, 0.15);
+    --shadow-heavy: 0 20px 40px rgba(52, 152, 219, 0.2);
     --border-radius: 15px;
     --transition: all 0.3s ease;
 }
@@ -32,7 +35,7 @@ body {
 
 /* ===== HEADER MEJORADO ===== */
 .header {
-    background: linear-gradient(135deg, var(--secondary-color) 0%, #34495e 100%);
+    background: var(--primary-gradient);
     color: white;
     padding: 20px 0 10px;
     box-shadow: var(--shadow-medium);
@@ -62,8 +65,8 @@ body {
 
 .logo i {
     font-size: 2.5rem;
-    color: var(--primary-color);
-    filter: drop-shadow(0 0 10px rgba(52, 152, 219, 0.3));
+    color: white;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.4));
 }
 
 .logo h1 {
@@ -73,6 +76,7 @@ body {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    text-shadow: 2px 2px 4px rgba(52, 152, 219, 0.3);
 }
 
 .stats {
@@ -93,21 +97,23 @@ body {
     border-radius: 20px;
     backdrop-filter: blur(5px);
     transition: var(--transition);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .stats div:hover {
     background: rgba(255, 255, 255, 0.2);
     transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2);
 }
 
 /* ===== NAVEGACIÓN MEJORADA ===== */
 .main-nav {
     width: 100%;
-    background: rgba(52, 73, 94, 0.9);
+    background: linear-gradient(135deg, var(--secondary-color) 0%, var(--dark-primary) 100%);
     backdrop-filter: blur(15px);
     border-radius: 0 0 25px 25px;
     overflow: hidden;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-light);
 }
 
 .nav-wrapper {
@@ -143,7 +149,7 @@ body {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    background: linear-gradient(90deg, transparent, rgba(52, 152, 219, 0.3), transparent);
     transition: left 0.6s;
 }
 
@@ -153,7 +159,7 @@ body {
 
 .nav-link:hover,
 .nav-link.active {
-    background: linear-gradient(135deg, var(--primary-color), #2980b9);
+    background: var(--primary-gradient);
     transform: scale(1.05) translateY(-2px);
     box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
     color: white;
@@ -179,7 +185,7 @@ body {
 .news-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    grid-auto-rows: auto; /* Cambia de minmax(400px, auto) a auto */
+    grid-auto-rows: auto;
     gap: 25px;
     margin-top: 30px;
 }
@@ -220,14 +226,14 @@ body {
     position: relative;
     display: flex;
     flex-direction: column;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    height: auto; /* Asegura que la altura sea automática */
+    border: 1px solid rgba(52, 152, 219, 0.2);
+    height: auto;
 }
 
 .news-card:hover {
     transform: translateY(-8px);
     box-shadow: var(--shadow-heavy);
-    border-color: rgba(52, 152, 219, 0.3);
+    border-color: rgba(52, 152, 219, 0.5);
 }
 
 .news-card::before {
@@ -237,7 +243,7 @@ body {
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, var(--primary-color), var(--accent-color), var(--success-color));
+    background: var(--primary-gradient);
     opacity: 0;
     transition: var(--transition);
 }
@@ -250,7 +256,7 @@ body {
 .image-container {
     position: relative;
     overflow: hidden;
-    background: linear-gradient(45deg, #f0f0f0, #e0e0e0);
+    background: linear-gradient(45deg, var(--light-primary), #85c1e9);
     flex-shrink: 0;
 }
 
@@ -284,9 +290,9 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #999;
+    color: var(--dark-primary);
     font-size: 3rem;
-    background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+    background: linear-gradient(45deg, var(--bg-light), var(--light-primary));
 }
 
 /* ===== CONTENIDO DE CARDS ===== */
@@ -296,8 +302,8 @@ body {
     flex-direction: column;
     flex-grow: 1;
     gap: 15px;
-    justify-content: space-between; /* Distribuye el espacio entre los elementos */
-    min-height: 0; /* Asegura que no se expanda más allá de lo necesario */
+    justify-content: space-between;
+    min-height: 0;
 }
 
 /* Títulos adaptivos y completos */
@@ -307,32 +313,29 @@ body {
     line-height: 1.4;
     transition: var(--transition);
     cursor: pointer;
-    /* Elimina flex-grow: 1 para que no ocupe todo el espacio vertical */
     display: flex;
     align-items: flex-start;
-    margin-bottom: 0; /* Asegura que no haya margen extra */
+    margin-bottom: 0;
 }
 
 .news-card.large .news-title {
     font-size: 1.6rem;
-    /* Elimina: margin-bottom: 15px; */
 }
 
 .news-card.medium .news-title {
     font-size: 1.4rem;
-    /* Elimina: margin-bottom: 12px; */
 }
 
 .news-card.small .news-title,
 .news-card .news-title {
     font-size: 1.2rem;
-    /* Elimina: margin-bottom: 10px; */
 }
 
 .news-title:hover {
     color: var(--primary-color);
     transform: translateX(5px);
 }
+
 /* Meta información mejorada */
 .news-meta {
     display: flex;
@@ -370,21 +373,20 @@ body {
     justify-content: space-between;
     align-items: center;
     gap: 15px;
-    padding-top: 10px; /* Añade un padding controlado en lugar de margin-top: auto */
-    flex-shrink: 0; /* Evita que se comprima */
+    padding-top: 10px;
+    flex-shrink: 0;
 }
 
-/* Asegurar que el contenido se distribuya correctamente */
 .card-content > *:not(.news-actions) {
-    flex-shrink: 0; /* Evita que se compriman los elementos */
+    flex-shrink: 0;
 }
 
 .card-content > .news-actions {
-    margin-top: auto; /* Las acciones siempre van al fondo */
+    margin-top: auto;
 }
 
 .read-more {
-    background: linear-gradient(135deg, var(--primary-color), #2980b9);
+    background: var(--primary-gradient);
     color: white;
     padding: 12px 24px;
     border-radius: 25px;
@@ -396,12 +398,14 @@ body {
     gap: 8px;
     font-size: 0.9rem;
     flex-shrink: 0;
+    border: 1px solid var(--dark-primary);
 }
 
 .read-more:hover {
-    background: linear-gradient(135deg, #2980b9, #1abc9c);
+    background: linear-gradient(135deg, var(--dark-primary), #1abc9c);
+    color: white;
     transform: translateX(5px) scale(1.05);
-    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
 }
 
 .share-btn {
@@ -439,7 +443,7 @@ body {
     gap: 20px;
     align-items: center;
     flex-wrap: wrap;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(52, 152, 219, 0.2);
 }
 
 .filter-item {
@@ -465,7 +469,7 @@ body {
 .refresh-btn {
     background: linear-gradient(135deg, var(--success-color), #2ecc71);
     color: white;
-    border: none;
+    border: 1px solid var(--success-color);
     padding: 12px 24px;
     border-radius: 25px;
     cursor: pointer;
@@ -479,6 +483,7 @@ body {
 
 .refresh-btn:hover {
     background: linear-gradient(135deg, #2ecc71, var(--success-color));
+    color: white;
     transform: scale(1.05) translateY(-2px);
     box-shadow: 0 8px 25px rgba(39, 174, 96, 0.3);
 }

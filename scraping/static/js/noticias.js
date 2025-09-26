@@ -56,10 +56,16 @@ function setupImageHandling() {
 
         // Error al cargar imagen
         img.addEventListener('error', function() {
+            const container = this.closest('.image-container');
+            if (!container) {
+                console.warn('Contenedor de imagen no encontrado:', this);
+                return;
+            }
+            
             const placeholder = document.createElement('div');
             placeholder.className = 'image-placeholder';
             placeholder.innerHTML = '<i class="fas fa-image"></i>';
-            this.parentElement.replaceChild(placeholder, this);
+            container.replaceChild(placeholder, this);
         });
     });
 }
@@ -345,11 +351,16 @@ function setupLazyLoading() {
                             img.removeAttribute('data-src');
                         };
                         tempImg.onerror = () => {
-                            // Crear placeholder si falla la carga
+                            const parent = img.parentElement;
+                            if (!parent) {
+                                console.warn('Imagen sin padre en lazy loading:', img);
+                                return;
+                            }
+
                             const placeholder = document.createElement('div');
                             placeholder.className = 'image-placeholder';
                             placeholder.innerHTML = '<i class="fas fa-image"></i>';
-                            img.parentElement.replaceChild(placeholder, img);
+                            parent.replaceChild(placeholder, img);
                         };
                         tempImg.src = img.dataset.src;
                         

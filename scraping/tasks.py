@@ -9,3 +9,7 @@ def scrape_all_sections():
     call_command('scrape_mundo')
     call_command('scrape_tecnologia')
     call_command('scrape_peru21')
+    call_command('scrape_peru21D')
+    call_command('scrape_peru21G')
+    call_command('scrape_peru21I')
+    call_command('scrape_peru21L')

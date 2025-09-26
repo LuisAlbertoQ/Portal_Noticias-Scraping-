@@ -14,4 +14,8 @@ urlpatterns = [
     path('scraping/tecnologia', views.ejecutar_scraping_tecnologia, name='scraping_tecnologia'),
     #Peru21
     path('peru21', views.peru21, name='peru21'),
+    path('peru21/deportes', views.peru21d, name='peru21d'),
+    path('peru21/gastronomia', views.peru21g, name='peru21g'),
+    path('peru21/investigacion', views.peru21i, name='peru21i'),
+    path('peru21/lima', views.peru21l, name='peru21l'),
 ]

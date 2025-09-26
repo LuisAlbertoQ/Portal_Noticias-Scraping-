@@ -367,3 +367,183 @@ def peru21(request):
     }
     
     return render(request, 'peru21/peru21.html', context)
+
+def peru21d(request):
+    filtro_imagen = request.GET.get('con_imagen', False)
+    filtro_fecha = request.GET.get('fecha', 'todas')
+    busqueda = request.GET.get('q', '')
+
+    # 🔹 Solo noticias de Deportes21
+    noticias = Noticia.objects.filter(origen='peru21', enlace__icontains="/deportes/")
+
+    if busqueda:
+        noticias = noticias.filter(
+            Q(titulo__icontains=busqueda) |
+            Q(autor__icontains=busqueda)
+        )
+
+    if filtro_imagen:
+        noticias = noticias.exclude(imagen__isnull=True).exclude(imagen='')
+
+    if filtro_fecha == 'hoy':
+        hoy = timezone.now().date()
+        noticias = noticias.filter(fecha__date=hoy)
+    elif filtro_fecha == 'semana':
+        hace_una_semana = timezone.now() - timedelta(days=7)
+        noticias = noticias.filter(fecha__gte=hace_una_semana)
+    elif filtro_fecha == 'mes':
+        hace_un_mes = timezone.now() - timedelta(days=30)
+        noticias = noticias.filter(fecha__gte=hace_un_mes)
+
+    noticias = noticias.order_by('-fecha', '-fecha_scraping')
+
+    total_noticias = noticias.count()
+    noticias_con_imagen = noticias.exclude(imagen__isnull=True).exclude(imagen='').count()
+
+    context = {
+        'noticias': noticias,
+        'total_noticias': total_noticias,
+        'noticias_con_imagen': noticias_con_imagen,
+        'filtro_actual': {
+            'imagen': filtro_imagen,
+            'fecha': filtro_fecha,
+            'busqueda': busqueda
+        }
+    }
+
+    return render(request, 'peru21/peru21d.html', context)
+
+def peru21g(request):
+    filtro_imagen = request.GET.get('con_imagen', False)
+    filtro_fecha = request.GET.get('fecha', 'todas')
+    busqueda = request.GET.get('q', '')
+
+    # 🔹 Solo noticias de Gastronomia21
+    noticias = Noticia.objects.filter(origen='peru21', enlace__icontains="/gastronomia/")
+
+    if busqueda:
+        noticias = noticias.filter(
+            Q(titulo__icontains=busqueda) |
+            Q(autor__icontains=busqueda)
+        )
+
+    if filtro_imagen:
+        noticias = noticias.exclude(imagen__isnull=True).exclude(imagen='')
+
+    if filtro_fecha == 'hoy':
+        hoy = timezone.now().date()
+        noticias = noticias.filter(fecha__date=hoy)
+    elif filtro_fecha == 'semana':
+        hace_una_semana = timezone.now() - timedelta(days=7)
+        noticias = noticias.filter(fecha__gte=hace_una_semana)
+    elif filtro_fecha == 'mes':
+        hace_un_mes = timezone.now() - timedelta(days=30)
+        noticias = noticias.filter(fecha__gte=hace_un_mes)
+
+    noticias = noticias.order_by('-fecha', '-fecha_scraping')
+
+    total_noticias = noticias.count()
+    noticias_con_imagen = noticias.exclude(imagen__isnull=True).exclude(imagen='').count()
+
+    context = {
+        'noticias': noticias,
+        'total_noticias': total_noticias,
+        'noticias_con_imagen': noticias_con_imagen,
+        'filtro_actual': {
+            'imagen': filtro_imagen,
+            'fecha': filtro_fecha,
+            'busqueda': busqueda
+        }
+    }
+
+    return render(request, 'peru21/peru21g.html', context)
+
+def peru21i(request):
+    filtro_imagen = request.GET.get('con_imagen', False)
+    filtro_fecha = request.GET.get('fecha', 'todas')
+    busqueda = request.GET.get('q', '')
+
+    # 🔹 Solo noticias de Investigacion21
+    noticias = Noticia.objects.filter(origen='peru21', enlace__icontains="/investigacion/")
+
+    if busqueda:
+        noticias = noticias.filter(
+            Q(titulo__icontains=busqueda) |
+            Q(autor__icontains=busqueda)
+        )
+
+    if filtro_imagen:
+        noticias = noticias.exclude(imagen__isnull=True).exclude(imagen='')
+
+    if filtro_fecha == 'hoy':
+        hoy = timezone.now().date()
+        noticias = noticias.filter(fecha__date=hoy)
+    elif filtro_fecha == 'semana':
+        hace_una_semana = timezone.now() - timedelta(days=7)
+        noticias = noticias.filter(fecha__gte=hace_una_semana)
+    elif filtro_fecha == 'mes':
+        hace_un_mes = timezone.now() - timedelta(days=30)
+        noticias = noticias.filter(fecha__gte=hace_un_mes)
+
+    noticias = noticias.order_by('-fecha', '-fecha_scraping')
+
+    total_noticias = noticias.count()
+    noticias_con_imagen = noticias.exclude(imagen__isnull=True).exclude(imagen='').count()
+
+    context = {
+        'noticias': noticias,
+        'total_noticias': total_noticias,
+        'noticias_con_imagen': noticias_con_imagen,
+        'filtro_actual': {
+            'imagen': filtro_imagen,
+            'fecha': filtro_fecha,
+            'busqueda': busqueda
+        }
+    }
+
+    return render(request, 'peru21/peru21i.html', context)
+
+def peru21l(request):
+    filtro_imagen = request.GET.get('con_imagen', False)
+    filtro_fecha = request.GET.get('fecha', 'todas')
+    busqueda = request.GET.get('q', '')
+
+    # 🔹 Solo noticias de Lima21
+    noticias = Noticia.objects.filter(origen='peru21', enlace__icontains="/lima/")
+
+    if busqueda:
+        noticias = noticias.filter(
+            Q(titulo__icontains=busqueda) |
+            Q(autor__icontains=busqueda)
+        )
+
+    if filtro_imagen:
+        noticias = noticias.exclude(imagen__isnull=True).exclude(imagen='')
+
+    if filtro_fecha == 'hoy':
+        hoy = timezone.now().date()
+        noticias = noticias.filter(fecha__date=hoy)
+    elif filtro_fecha == 'semana':
+        hace_una_semana = timezone.now() - timedelta(days=7)
+        noticias = noticias.filter(fecha__gte=hace_una_semana)
+    elif filtro_fecha == 'mes':
+        hace_un_mes = timezone.now() - timedelta(days=30)
+        noticias = noticias.filter(fecha__gte=hace_un_mes)
+
+    noticias = noticias.order_by('-fecha', '-fecha_scraping')
+
+    total_noticias = noticias.count()
+    noticias_con_imagen = noticias.exclude(imagen__isnull=True).exclude(imagen='').count()
+
+    context = {
+        'noticias': noticias,
+        'total_noticias': total_noticias,
+        'noticias_con_imagen': noticias_con_imagen,
+        'filtro_actual': {
+            'imagen': filtro_imagen,
+            'fecha': filtro_fecha,
+            'busqueda': busqueda
+        }
+    }
+
+    return render(request, 'peru21/peru21l.html', context)

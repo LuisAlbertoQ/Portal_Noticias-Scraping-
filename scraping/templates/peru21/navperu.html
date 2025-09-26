@@ -1,0 +1,20 @@
+<!-- nav.html -->
+<nav class="main-nav">
+    <div class="nav-wrapper">
+        <a href="{% url 'peru21' %}" class="nav-link {% if request.resolver_match.url_name == 'peru21' %}active{% endif %}">
+            <i class="fas fa-home"></i> Inicio
+        </a>
+        <a href="{% url 'peru21d' %}" class="nav-link {% if request.resolver_match.url_name == 'deportes' %}active{% endif %}">
+            <i class="fas fa-futbol"></i> Deportes
+        </a>
+        <a href="{% url 'peru21g' %}" class="nav-link {% if request.resolver_match.url_name == 'gastronomia' %}active{% endif %}">
+            <i class="fas fa-drumstick-bite"></i> Gastronomia
+        </a>
+        <a href="{% url 'peru21i' %}" class="nav-link {% if request.resolver_match.url_name == 'investigacion' %}active{% endif %}">
+            <i class="fas fa-flask"></i> Investigacion
+        </a>
+        <a href="{% url 'peru21l' %}" class="nav-link {% if request.resolver_match.url_name == 'lima' %}active{% endif %}">
+            <i class="fas fa-fire"></i> Lima
+        </a>
+    </div>
+</nav>
