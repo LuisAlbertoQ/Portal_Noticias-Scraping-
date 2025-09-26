@@ -4,6 +4,7 @@ from django.db.models import Q
 from django.utils import timezone
 from datetime import timedelta
 from .models import Noticia
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import JsonResponse
 from django.core.management import call_command
 
@@ -41,22 +42,43 @@ def lista_noticias(request):
     
     # Ordenar por fecha
     noticias = noticias.order_by('-fecha', '-fecha_scraping')
-    
+
+    # Paginación con soporte para per_page
+    page = request.GET.get('page', 1)
+    per_page = request.GET.get('per_page', 10)  # valor por defecto: 10
+
+    # Validar y convertir per_page
+    try:
+        per_page = int(per_page)
+        if per_page not in [10, 20, 50]:
+            per_page = 10
+    except (ValueError, TypeError):
+        per_page = 10
+
+    paginator = Paginator(noticias, per_page)
+    try:
+        noticias_paginadas = paginator.page(page)
+    except PageNotAnInteger:
+        noticias_paginadas = paginator.page(1)
+    except EmptyPage:
+        noticias_paginadas = paginator.page(paginator.num_pages)
+
     # Estadísticas
     total_noticias = noticias.count()
     noticias_con_imagen = noticias.exclude(imagen__isnull=True).exclude(imagen='').count()
-    
+
     context = {
-        'noticias': noticias,
+        'noticias': noticias_paginadas,
         'total_noticias': total_noticias,
         'noticias_con_imagen': noticias_con_imagen,
         'filtro_actual': {
             'imagen': filtro_imagen,
             'fecha': filtro_fecha,
             'busqueda': busqueda
-        }
+        },
+        'paginator': paginator
     }
-    
+
     return render(request, 'noticias/lista.html', context)
 
 def ejecutar_scraping_lista_noticias(request):
@@ -102,19 +124,41 @@ def politica(request):
         noticias = noticias.filter(fecha__gte=hace_un_mes)
 
     noticias = noticias.order_by('-fecha', '-fecha_scraping')
+    
+    # Paginación con soporte para per_page
+    page = request.GET.get('page', 1)
+    per_page = request.GET.get('per_page', 10)  # valor por defecto: 10
 
+    # Validar y convertir per_page
+    try:
+        per_page = int(per_page)
+        if per_page not in [10, 20, 50]:
+            per_page = 10
+    except (ValueError, TypeError):
+        per_page = 10
+
+    paginator = Paginator(noticias, per_page)
+    try:
+        noticias_paginadas = paginator.page(page)
+    except PageNotAnInteger:
+        noticias_paginadas = paginator.page(1)
+    except EmptyPage:
+        noticias_paginadas = paginator.page(paginator.num_pages)
+
+    # Estadísticas
     total_noticias = noticias.count()
     noticias_con_imagen = noticias.exclude(imagen__isnull=True).exclude(imagen='').count()
 
     context = {
-        'noticias': noticias,
+        'noticias': noticias_paginadas,
         'total_noticias': total_noticias,
         'noticias_con_imagen': noticias_con_imagen,
         'filtro_actual': {
             'imagen': filtro_imagen,
             'fecha': filtro_fecha,
             'busqueda': busqueda
-        }
+        },
+        'paginator': paginator
     }
 
     return render(request, 'noticias/politica.html', context)
@@ -162,12 +206,31 @@ def economia(request):
         noticias = noticias.filter(fecha__gte=hace_un_mes)
 
     noticias = noticias.order_by('-fecha', '-fecha_scraping')
+    
+    page = request.GET.get('page', 1)
+    per_page = request.GET.get('per_page', 10)  # valor por defecto
+    
+    # Validar y convertir per_page
+    try:
+        per_page = int(per_page)
+        if per_page not in [10, 20, 50]:
+            per_page = 10
+    except (ValueError, TypeError):
+        per_page = 10
+
+    paginator = Paginator(noticias, per_page)
+    try:
+        noticias_paginadas = paginator.page(page)
+    except PageNotAnInteger:
+        noticias_paginadas = paginator.page(1)
+    except EmptyPage:
+        noticias_paginadas = paginator.page(paginator.num_pages)
 
     total_noticias = noticias.count()
     noticias_con_imagen = noticias.exclude(imagen__isnull=True).exclude(imagen='').count()
 
     context = {
-        'noticias': noticias,
+        'noticias': noticias_paginadas,
         'total_noticias': total_noticias,
         'noticias_con_imagen': noticias_con_imagen,
         'filtro_actual': {
@@ -222,12 +285,31 @@ def mundo(request):
         noticias = noticias.filter(fecha__gte=hace_un_mes)
 
     noticias = noticias.order_by('-fecha', '-fecha_scraping')
+    
+    page = request.GET.get('page', 1)
+    per_page = request.GET.get('per_page', 10)  # valor por defecto
+    
+    # Validar y convertir per_page
+    try:
+        per_page = int(per_page)
+        if per_page not in [10, 20, 50]:
+            per_page = 10
+    except (ValueError, TypeError):
+        per_page = 10
+
+    paginator = Paginator(noticias, per_page)
+    try:
+        noticias_paginadas = paginator.page(page)
+    except PageNotAnInteger:
+        noticias_paginadas = paginator.page(1)
+    except EmptyPage:
+        noticias_paginadas = paginator.page(paginator.num_pages)
 
     total_noticias = noticias.count()
     noticias_con_imagen = noticias.exclude(imagen__isnull=True).exclude(imagen='').count()
 
     context = {
-        'noticias': noticias,
+        'noticias': noticias_paginadas,
         'total_noticias': total_noticias,
         'noticias_con_imagen': noticias_con_imagen,
         'filtro_actual': {
@@ -282,12 +364,31 @@ def tecnologia(request):
         noticias = noticias.filter(fecha__gte=hace_un_mes)
 
     noticias = noticias.order_by('-fecha', '-fecha_scraping')
+    
+    page = request.GET.get('page', 1)
+    per_page = request.GET.get('per_page', 10)  # valor por defecto
+    
+    # Validar y convertir per_page
+    try:
+        per_page = int(per_page)
+        if per_page not in [10, 20, 50]:
+            per_page = 10
+    except (ValueError, TypeError):
+        per_page = 10
+
+    paginator = Paginator(noticias, per_page)
+    try:
+        noticias_paginadas = paginator.page(page)
+    except PageNotAnInteger:
+        noticias_paginadas = paginator.page(1)
+    except EmptyPage:
+        noticias_paginadas = paginator.page(paginator.num_pages)
 
     total_noticias = noticias.count()
     noticias_con_imagen = noticias.exclude(imagen__isnull=True).exclude(imagen='').count()
 
     context = {
-        'noticias': noticias,
+        'noticias': noticias_paginadas,
         'total_noticias': total_noticias,
         'noticias_con_imagen': noticias_con_imagen,
         'filtro_actual': {
@@ -351,12 +452,31 @@ def peru21(request):
     # Ordenar por fecha
     noticias = noticias.order_by('-fecha', '-fecha_scraping')
     
+    page = request.GET.get('page', 1)
+    per_page = request.GET.get('per_page', 10)  # valor por defecto
+    
+    # Validar y convertir per_page
+    try:
+        per_page = int(per_page)
+        if per_page not in [10, 20, 50]:
+            per_page = 10
+    except (ValueError, TypeError):
+        per_page = 10
+
+    paginator = Paginator(noticias, per_page)
+    try:
+        noticias_paginadas = paginator.page(page)
+    except PageNotAnInteger:
+        noticias_paginadas = paginator.page(1)
+    except EmptyPage:
+        noticias_paginadas = paginator.page(paginator.num_pages)
+    
     # Estadísticas
     total_noticias = noticias.count()
     noticias_con_imagen = noticias.exclude(imagen__isnull=True).exclude(imagen='').count()
     
     context = {
-        'noticias': noticias,
+        'noticias': noticias_paginadas,
         'total_noticias': total_noticias,
         'noticias_con_imagen': noticias_con_imagen,
         'filtro_actual': {
@@ -396,12 +516,31 @@ def peru21d(request):
         noticias = noticias.filter(fecha__gte=hace_un_mes)
 
     noticias = noticias.order_by('-fecha', '-fecha_scraping')
+    
+    page = request.GET.get('page', 1)
+    per_page = request.GET.get('per_page', 10)  # valor por defecto
+    
+    # Validar y convertir per_page
+    try:
+        per_page = int(per_page)
+        if per_page not in [10, 20, 50]:
+            per_page = 10
+    except (ValueError, TypeError):
+        per_page = 10
+
+    paginator = Paginator(noticias, per_page)
+    try:
+        noticias_paginadas = paginator.page(page)
+    except PageNotAnInteger:
+        noticias_paginadas = paginator.page(1)
+    except EmptyPage:
+        noticias_paginadas = paginator.page(paginator.num_pages)
 
     total_noticias = noticias.count()
     noticias_con_imagen = noticias.exclude(imagen__isnull=True).exclude(imagen='').count()
 
     context = {
-        'noticias': noticias,
+        'noticias': noticias_paginadas,
         'total_noticias': total_noticias,
         'noticias_con_imagen': noticias_con_imagen,
         'filtro_actual': {
@@ -441,12 +580,31 @@ def peru21g(request):
         noticias = noticias.filter(fecha__gte=hace_un_mes)
 
     noticias = noticias.order_by('-fecha', '-fecha_scraping')
+    
+    page = request.GET.get('page', 1)
+    per_page = request.GET.get('per_page', 10)  # valor por defecto
+    
+    # Validar y convertir per_page
+    try:
+        per_page = int(per_page)
+        if per_page not in [10, 20, 50]:
+            per_page = 10
+    except (ValueError, TypeError):
+        per_page = 10
+
+    paginator = Paginator(noticias, per_page)
+    try:
+        noticias_paginadas = paginator.page(page)
+    except PageNotAnInteger:
+        noticias_paginadas = paginator.page(1)
+    except EmptyPage:
+        noticias_paginadas = paginator.page(paginator.num_pages)
 
     total_noticias = noticias.count()
     noticias_con_imagen = noticias.exclude(imagen__isnull=True).exclude(imagen='').count()
 
     context = {
-        'noticias': noticias,
+        'noticias': noticias_paginadas,
         'total_noticias': total_noticias,
         'noticias_con_imagen': noticias_con_imagen,
         'filtro_actual': {
@@ -486,12 +644,31 @@ def peru21i(request):
         noticias = noticias.filter(fecha__gte=hace_un_mes)
 
     noticias = noticias.order_by('-fecha', '-fecha_scraping')
+    
+    page = request.GET.get('page', 1)
+    per_page = request.GET.get('per_page', 10)  # valor por defecto
+    
+    # Validar y convertir per_page
+    try:
+        per_page = int(per_page)
+        if per_page not in [10, 20, 50]:
+            per_page = 10
+    except (ValueError, TypeError):
+        per_page = 10
+
+    paginator = Paginator(noticias, per_page)
+    try:
+        noticias_paginadas = paginator.page(page)
+    except PageNotAnInteger:
+        noticias_paginadas = paginator.page(1)
+    except EmptyPage:
+        noticias_paginadas = paginator.page(paginator.num_pages)
 
     total_noticias = noticias.count()
     noticias_con_imagen = noticias.exclude(imagen__isnull=True).exclude(imagen='').count()
 
     context = {
-        'noticias': noticias,
+        'noticias': noticias_paginadas,
         'total_noticias': total_noticias,
         'noticias_con_imagen': noticias_con_imagen,
         'filtro_actual': {
@@ -531,12 +708,31 @@ def peru21l(request):
         noticias = noticias.filter(fecha__gte=hace_un_mes)
 
     noticias = noticias.order_by('-fecha', '-fecha_scraping')
+    
+    page = request.GET.get('page', 1)
+    per_page = request.GET.get('per_page', 10)  # valor por defecto
+    
+    # Validar y convertir per_page
+    try:
+        per_page = int(per_page)
+        if per_page not in [10, 20, 50]:
+            per_page = 10
+    except (ValueError, TypeError):
+        per_page = 10
+
+    paginator = Paginator(noticias, per_page)
+    try:
+        noticias_paginadas = paginator.page(page)
+    except PageNotAnInteger:
+        noticias_paginadas = paginator.page(1)
+    except EmptyPage:
+        noticias_paginadas = paginator.page(paginator.num_pages)
 
     total_noticias = noticias.count()
     noticias_con_imagen = noticias.exclude(imagen__isnull=True).exclude(imagen='').count()
 
     context = {
-        'noticias': noticias,
+        'noticias': noticias_paginadas,
         'total_noticias': total_noticias,
         'noticias_con_imagen': noticias_con_imagen,
         'filtro_actual': {

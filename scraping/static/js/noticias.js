@@ -1,4 +1,31 @@
 // ===== SISTEMA DE TAMAÑOS DINÁMICOS PARA CARDS =====
+
+// Scroll al top al cambiar de página
+document.addEventListener('DOMContentLoaded', function() {
+    const paginacion = document.querySelector('.pagination');
+    if (paginacion) {
+        paginacion.addEventListener('click', function(e) {
+            if (e.target.classList.contains('page-link')) {
+                setTimeout(() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }, 100);
+            }
+        });
+    }
+});
+    // Manejar cambio en selector de elementos por página
+function setupPerPageSelector() {
+    const select = document.getElementById('per-page');
+    if (!select) return;
+    
+    select.addEventListener('change', function() {
+        const perPage = this.value;
+        const url = new URL(window.location);
+        url.searchParams.set('per_page', perPage);
+        url.searchParams.set('page', '1'); // Reiniciar a página 1
+        window.location.href = url.toString();
+    });
+}
 function assignCardSizes() {
     const cards = document.querySelectorAll('.news-card');
     const totalCards = cards.length;
@@ -501,6 +528,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setupMobileNavigation();
         setupKeyboardNavigation();
         setupPerformanceMonitoring();
+        setupPerPageSelector();
         
         console.log('✅ Portal de noticias inicializado correctamente');
         

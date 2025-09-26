@@ -183,7 +183,7 @@ class Command(BaseCommand):
                         self.stdout.write(f"📄 Procesando noticia {i+1}/{len(noticias)}")
 
                         try:
-                            titulo = noticia.locator(".fs-wi__title, .story-item__content-title.overflow-hidden").inner_text(timeout=5000).strip()
+                            titulo = noticia.locator(".fs-wi__title, .story-item__content-title overflow-hidden").inner_text(timeout=5000).strip()
                         except:
                             titulo = "Sin título"
 

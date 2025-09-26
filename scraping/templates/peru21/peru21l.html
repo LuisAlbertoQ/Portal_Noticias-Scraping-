@@ -98,6 +98,38 @@
                 </article>
                 {% endfor %}
             </div>
+            <!-- Controles de paginación -->
+            <div class="pagination-controls">
+                <!-- Selector de elementos por página -->
+                <div class="per-page-selector">
+                    <label for="per-page">Mostrar:</label>
+                    <select id="per-page" class="per-page-select">
+                        <option value="10" {% if request.GET.per_page == '10' or not request.GET.per_page %}selected{% endif %}>10</option>
+                        <option value="20" {% if request.GET.per_page == '20' %}selected{% endif %}>20</option>
+                        <option value="50" {% if request.GET.per_page == '50' %}selected{% endif %}>50</option>
+                    </select>
+                    <span>por página</span>
+                </div>
+
+                <!-- Paginación tradicional -->
+                <div class="pagination">
+                    {% if noticias.has_previous %}
+                        <a href="?page={{ noticias.previous_page_number }}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}" class="page-link">&laquo; Anterior</a>
+                    {% endif %}
+
+                    {% for num in noticias.paginator.page_range %}
+                        {% if num == noticias.number %}
+                            <span class="current-page">{{ num }}</span>
+                        {% elif num > noticias.number|add:'-3' and num < noticias.number|add:'3' %}
+                            <a href="?page={{ num }}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}" class="page-link">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if noticias.has_next %}
+                        <a href="?page={{ noticias.next_page_number }}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}" class="page-link">Siguiente &raquo;</a>
+                    {% endif %}
+                </div>
+            </div>
         {% else %}
             <div class="no-news">
                 <i class="fas fa-newspaper"></i>

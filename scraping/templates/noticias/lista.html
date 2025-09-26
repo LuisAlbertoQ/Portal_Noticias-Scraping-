@@ -5,10 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Noticias El Comercio - Portal de Noticias</title>
-
     <!-- CSS externos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
     <!-- CSS propio -->
     <link rel="stylesheet" href="{% static 'css/noticias.css' %}?v=2">
 </head>
@@ -20,7 +18,7 @@
                 <h1>El Comercio</h1>
             </div>
             <div class="stats">
-                <div><i class="fas fa-newspaper"></i> {{ noticias.count }} noticias</div>
+                <div><i class="fas fa-newspaper"></i> {{ noticias.paginator.count }} noticias</div>
                 <div><i class="fas fa-clock"></i> Actualizado hoy</div>
                 <div><i class="fas fa-users"></i> Portal de Noticias</div>
             </div>
@@ -100,6 +98,39 @@
                     </div>
                 </article>
                 {% endfor %}
+            </div>
+
+            <!-- Controles de paginación -->
+            <div class="pagination-controls">
+                <!-- Selector de elementos por página -->
+                <div class="per-page-selector">
+                    <label for="per-page">Mostrar:</label>
+                    <select id="per-page" class="per-page-select">
+                        <option value="10" {% if request.GET.per_page == '10' or not request.GET.per_page %}selected{% endif %}>10</option>
+                        <option value="20" {% if request.GET.per_page == '20' %}selected{% endif %}>20</option>
+                        <option value="50" {% if request.GET.per_page == '50' %}selected{% endif %}>50</option>
+                    </select>
+                    <span>por página</span>
+                </div>
+
+                <!-- Paginación tradicional -->
+                <div class="pagination">
+                    {% if noticias.has_previous %}
+                        <a href="?page={{ noticias.previous_page_number }}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}" class="page-link">&laquo; Anterior</a>
+                    {% endif %}
+
+                    {% for num in noticias.paginator.page_range %}
+                        {% if num == noticias.number %}
+                            <span class="current-page">{{ num }}</span>
+                        {% elif num > noticias.number|add:'-3' and num < noticias.number|add:'3' %}
+                            <a href="?page={{ num }}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}" class="page-link">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if noticias.has_next %}
+                        <a href="?page={{ noticias.next_page_number }}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}" class="page-link">Siguiente &raquo;</a>
+                    {% endif %}
+                </div>
             </div>
         {% else %}
             <div class="no-news">
