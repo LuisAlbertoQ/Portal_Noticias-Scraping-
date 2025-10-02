@@ -502,7 +502,7 @@ body {
 }
 
 .refresh-btn {
-    background: linear-gradient(135deg, var(--success-color), #2ecc71);
+    background: var(--primary-gradient);
     color: white;
     border: 1px solid var(--success-color);
     padding: 12px 24px;

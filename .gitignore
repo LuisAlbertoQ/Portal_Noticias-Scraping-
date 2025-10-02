@@ -47,3 +47,4 @@ dump.rdb
 celerybeat-schedule
 celerybeat-schedule-shm
 celerybeat-schedule-wal
+celerybeat-schedule-hash
