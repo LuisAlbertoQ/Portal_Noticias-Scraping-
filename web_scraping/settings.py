@@ -139,13 +139,13 @@ CELERY_BROKER_URL = 'redis://localhost:6379/0'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 CELERY_TIMEZONE = 'America/Lima'          # tu zona horaria
 
-# líneas para persistencia
-CELERY_BEAT_SCHEDULE_FILENAME = 'celerybeat-schedule'
-CELERY_BEAT_SCHEDULER = 'celery.beat:PersistentScheduler'
-
 CELERY_BEAT_SCHEDULE = {
     'scrape-all-every-5-hours': {
         'task': 'scraping.tasks.scrape_all_sections',
         'schedule': 5 * 60 * 60.0,        # 18,000 segundos = 5 horas
     },
 }
+
+# líneas para persistencia
+CELERY_BEAT_SCHEDULE_FILENAME = 'celerybeat-schedule'
+CELERY_BEAT_SCHEDULER = 'celery.beat:PersistentScheduler'
