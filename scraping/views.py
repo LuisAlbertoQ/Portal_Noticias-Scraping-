@@ -8,738 +8,144 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import JsonResponse
 from django.core.management import call_command
 
-#Lista todas las noticias con filtros y estadísticas
+# Función helper para manejar lógica común de listas de noticias
+def lista_noticias_helper(request, queryset_base, template_name):
+    # Filtros comunes
+    filtro_imagen = request.GET.get('con_imagen', False)
+    filtro_fecha = request.GET.get('fecha', 'todas')
+    busqueda = request.GET.get('q', '')
+    
+    noticias = queryset_base
+    
+    # Filtrar por búsqueda
+    if busqueda:
+        noticias = noticias.filter(
+            Q(titulo__icontains=busqueda) | 
+            Q(autor__icontains=busqueda)
+        )
+    
+    # Filtrar por imagen
+    if filtro_imagen:
+        noticias = noticias.exclude(imagen__isnull=True).exclude(imagen='')
+    
+    # Filtrar por fecha
+    if filtro_fecha == 'hoy':
+        hoy = timezone.now().date()
+        noticias = noticias.filter(fecha__date=hoy)
+    elif filtro_fecha == 'semana':
+        hace_una_semana = timezone.now() - timedelta(days=7)
+        noticias = noticias.filter(fecha__gte=hace_una_semana)
+    elif filtro_fecha == 'mes':
+        hace_un_mes = timezone.now() - timedelta(days=30)
+        noticias = noticias.filter(fecha__gte=hace_un_mes)
+    
+    # Ordenar
+    noticias = noticias.order_by('-fecha', '-fecha_scraping')
+    
+    # Paginación
+    page = request.GET.get('page', 1)
+    per_page = request.GET.get('per_page', 10)
+    try:
+        per_page = int(per_page)
+        if per_page not in [10, 20, 50]:
+            per_page = 10
+    except (ValueError, TypeError):
+        per_page = 10
+    
+    paginator = Paginator(noticias, per_page)
+    try:
+        noticias_paginadas = paginator.page(page)
+    except PageNotAnInteger:
+        noticias_paginadas = paginator.page(1)
+    except EmptyPage:
+        noticias_paginadas = paginator.page(paginator.num_pages)
+    
+    # Estadísticas (basadas en el queryset filtrado)
+    total_noticias = noticias.count()
+    noticias_con_imagen = noticias.exclude(imagen__isnull=True).exclude(imagen='').count()
+    
+    # Contexto común (incluyo paginator siempre para consistencia)
+    context = {
+        'noticias': noticias_paginadas,
+        'total_noticias': total_noticias,
+        'noticias_con_imagen': noticias_con_imagen,
+        'filtro_actual': {
+            'imagen': filtro_imagen,
+            'fecha': filtro_fecha,
+            'busqueda': busqueda
+        },
+        'paginator': paginator  # Agregado para todas por consistencia
+    }
+    
+    return render(request, template_name, context)
+
+# Vistas para El Comercio (usando el helper)
 def lista_noticias(request):
-    # Filtros
-    filtro_imagen = request.GET.get('con_imagen', False)
-    filtro_fecha = request.GET.get('fecha', 'todas')
-    busqueda = request.GET.get('q', '')
-    
-    # Query base
-    noticias = Noticia.objects.filter(Q(origen="elcomercio") | Q(origen="desconocido"))
-    
-    # Filtrar por búsqueda
-    if busqueda:
-        noticias = noticias.filter(
-            Q(titulo__icontains=busqueda) | 
-            Q(autor__icontains=busqueda)
-        )
-    
-    # Filtrar por imagen
-    if filtro_imagen:
-        noticias = noticias.exclude(imagen__isnull=True).exclude(imagen='')
-    
-    # Filtrar por fecha
-    if filtro_fecha == 'hoy':
-        hoy = timezone.now().date()
-        noticias = noticias.filter(fecha__date=hoy)
-    elif filtro_fecha == 'semana':
-        hace_una_semana = timezone.now() - timedelta(days=7)
-        noticias = noticias.filter(fecha__gte=hace_una_semana)
-    elif filtro_fecha == 'mes':
-        hace_un_mes = timezone.now() - timedelta(days=30)
-        noticias = noticias.filter(fecha__gte=hace_un_mes)
-    
-    # Ordenar por fecha
-    noticias = noticias.order_by('-fecha', '-fecha_scraping')
+    queryset = Noticia.objects.filter(Q(origen="elcomercio") | Q(origen="desconocido"))
+    return lista_noticias_helper(request, queryset, 'noticias/lista.html')
 
-    # Paginación con soporte para per_page
-    page = request.GET.get('page', 1)
-    per_page = request.GET.get('per_page', 10)  # valor por defecto: 10
-
-    # Validar y convertir per_page
-    try:
-        per_page = int(per_page)
-        if per_page not in [10, 20, 50]:
-            per_page = 10
-    except (ValueError, TypeError):
-        per_page = 10
-
-    paginator = Paginator(noticias, per_page)
-    try:
-        noticias_paginadas = paginator.page(page)
-    except PageNotAnInteger:
-        noticias_paginadas = paginator.page(1)
-    except EmptyPage:
-        noticias_paginadas = paginator.page(paginator.num_pages)
-
-    # Estadísticas
-    total_noticias = noticias.count()
-    noticias_con_imagen = noticias.exclude(imagen__isnull=True).exclude(imagen='').count()
-
-    context = {
-        'noticias': noticias_paginadas,
-        'total_noticias': total_noticias,
-        'noticias_con_imagen': noticias_con_imagen,
-        'filtro_actual': {
-            'imagen': filtro_imagen,
-            'fecha': filtro_fecha,
-            'busqueda': busqueda
-        },
-        'paginator': paginator
-    }
-
-    return render(request, 'noticias/lista.html', context)
-
-def ejecutar_scraping_lista_noticias(request):
-    """
-    Llama al comando de scraping de Lista Noticias
-    y devuelve el resultado en JSON.
-    """
-    if request.method == "POST":  # Seguridad: solo POST
-        buffer = io.StringIO()
-        try:
-            call_command("scrape_elcomercio", stdout=buffer)
-            return JsonResponse({"status": "ok", "log": buffer.getvalue()})
-        except Exception as e:
-            return JsonResponse({"status": "error", "error": str(e)})
-    return JsonResponse({"status": "error", "error": "Método no permitido"})
-
-#Lista noticias por categoria Politica
 def politica(request):
-    filtro_imagen = request.GET.get('con_imagen', False)
-    filtro_fecha = request.GET.get('fecha', 'todas')
-    busqueda = request.GET.get('q', '')
+    queryset = Noticia.objects.filter(Q(origen="elcomercio") | Q(origen="desconocido"), enlace__icontains="/politica/")
+    return lista_noticias_helper(request, queryset, 'noticias/politica.html')
 
-    # 🔹 Solo noticias de política
-    noticias = Noticia.objects.filter(Q(origen="elcomercio") | Q(origen="desconocido"), enlace__icontains="/politica/")
-
-    if busqueda:
-        noticias = noticias.filter(
-            Q(titulo__icontains=busqueda) |
-            Q(autor__icontains=busqueda)
-        )
-
-    if filtro_imagen:
-        noticias = noticias.exclude(imagen__isnull=True).exclude(imagen='')
-
-    if filtro_fecha == 'hoy':
-        hoy = timezone.now().date()
-        noticias = noticias.filter(fecha__date=hoy)
-    elif filtro_fecha == 'semana':
-        hace_una_semana = timezone.now() - timedelta(days=7)
-        noticias = noticias.filter(fecha__gte=hace_una_semana)
-    elif filtro_fecha == 'mes':
-        hace_un_mes = timezone.now() - timedelta(days=30)
-        noticias = noticias.filter(fecha__gte=hace_un_mes)
-
-    noticias = noticias.order_by('-fecha', '-fecha_scraping')
-    
-    # Paginación con soporte para per_page
-    page = request.GET.get('page', 1)
-    per_page = request.GET.get('per_page', 10)  # valor por defecto: 10
-
-    # Validar y convertir per_page
-    try:
-        per_page = int(per_page)
-        if per_page not in [10, 20, 50]:
-            per_page = 10
-    except (ValueError, TypeError):
-        per_page = 10
-
-    paginator = Paginator(noticias, per_page)
-    try:
-        noticias_paginadas = paginator.page(page)
-    except PageNotAnInteger:
-        noticias_paginadas = paginator.page(1)
-    except EmptyPage:
-        noticias_paginadas = paginator.page(paginator.num_pages)
-
-    # Estadísticas
-    total_noticias = noticias.count()
-    noticias_con_imagen = noticias.exclude(imagen__isnull=True).exclude(imagen='').count()
-
-    context = {
-        'noticias': noticias_paginadas,
-        'total_noticias': total_noticias,
-        'noticias_con_imagen': noticias_con_imagen,
-        'filtro_actual': {
-            'imagen': filtro_imagen,
-            'fecha': filtro_fecha,
-            'busqueda': busqueda
-        },
-        'paginator': paginator
-    }
-
-    return render(request, 'noticias/politica.html', context)
-
-def ejecutar_scraping_politica(request):
-    """
-    Llama al comando de scraping de Politica
-    y devuelve el resultado en JSON.
-    """
-    if request.method == "POST":  # Seguridad: solo POST
-        buffer = io.StringIO()
-        try:
-            call_command("scrape_elcomercio_pol", stdout=buffer)
-            return JsonResponse({"status": "ok", "log": buffer.getvalue()})
-        except Exception as e:
-            return JsonResponse({"status": "error", "error": str(e)})
-    return JsonResponse({"status": "error", "error": "Método no permitido"})
-
-#Lista noticias por categoria Economia
 def economia(request):
-    filtro_imagen = request.GET.get('con_imagen', False)
-    filtro_fecha = request.GET.get('fecha', 'todas')
-    busqueda = request.GET.get('q', '')
+    queryset = Noticia.objects.filter(Q(origen="elcomercio") | Q(origen="desconocido"), enlace__icontains="/economia/")
+    return lista_noticias_helper(request, queryset, 'noticias/economia.html')
 
-    # 🔹 Solo noticias de economia
-    noticias = Noticia.objects.filter(Q(origen="elcomercio") | Q(origen="desconocido"), enlace__icontains="/economia/")
-
-    if busqueda:
-        noticias = noticias.filter(
-            Q(titulo__icontains=busqueda) |
-            Q(autor__icontains=busqueda)
-        )
-
-    if filtro_imagen:
-        noticias = noticias.exclude(imagen__isnull=True).exclude(imagen='')
-
-    if filtro_fecha == 'hoy':
-        hoy = timezone.now().date()
-        noticias = noticias.filter(fecha__date=hoy)
-    elif filtro_fecha == 'semana':
-        hace_una_semana = timezone.now() - timedelta(days=7)
-        noticias = noticias.filter(fecha__gte=hace_una_semana)
-    elif filtro_fecha == 'mes':
-        hace_un_mes = timezone.now() - timedelta(days=30)
-        noticias = noticias.filter(fecha__gte=hace_un_mes)
-
-    noticias = noticias.order_by('-fecha', '-fecha_scraping')
-    
-    page = request.GET.get('page', 1)
-    per_page = request.GET.get('per_page', 10)  # valor por defecto
-    
-    # Validar y convertir per_page
-    try:
-        per_page = int(per_page)
-        if per_page not in [10, 20, 50]:
-            per_page = 10
-    except (ValueError, TypeError):
-        per_page = 10
-
-    paginator = Paginator(noticias, per_page)
-    try:
-        noticias_paginadas = paginator.page(page)
-    except PageNotAnInteger:
-        noticias_paginadas = paginator.page(1)
-    except EmptyPage:
-        noticias_paginadas = paginator.page(paginator.num_pages)
-
-    total_noticias = noticias.count()
-    noticias_con_imagen = noticias.exclude(imagen__isnull=True).exclude(imagen='').count()
-
-    context = {
-        'noticias': noticias_paginadas,
-        'total_noticias': total_noticias,
-        'noticias_con_imagen': noticias_con_imagen,
-        'filtro_actual': {
-            'imagen': filtro_imagen,
-            'fecha': filtro_fecha,
-            'busqueda': busqueda
-        }
-    }
-
-    return render(request, 'noticias/economia.html', context)
-
-def ejecutar_scraping_economia(request):
-    """
-    Llama al comando de scraping de Economía
-    y devuelve el resultado en JSON.
-    """
-    if request.method == "POST":  # Seguridad: solo POST
-        buffer = io.StringIO()
-        try:
-            call_command("scrape_economia", stdout=buffer)
-            return JsonResponse({"status": "ok", "log": buffer.getvalue()})
-        except Exception as e:
-            return JsonResponse({"status": "error", "error": str(e)})
-    return JsonResponse({"status": "error", "error": "Método no permitido"})
-
-#Lista noticias por categoria Mundo
 def mundo(request):
-    filtro_imagen = request.GET.get('con_imagen', False)
-    filtro_fecha = request.GET.get('fecha', 'todas')
-    busqueda = request.GET.get('q', '')
+    queryset = Noticia.objects.filter(Q(origen="elcomercio") | Q(origen="desconocido"), enlace__icontains="/mundo/")
+    return lista_noticias_helper(request, queryset, 'noticias/mundo.html')
 
-    # 🔹 Solo noticias de mundo
-    noticias = Noticia.objects.filter(Q(origen="elcomercio") | Q(origen="desconocido"), enlace__icontains="/mundo/")
-
-    if busqueda:
-        noticias = noticias.filter(
-            Q(titulo__icontains=busqueda) |
-            Q(autor__icontains=busqueda)
-        )
-
-    if filtro_imagen:
-        noticias = noticias.exclude(imagen__isnull=True).exclude(imagen='')
-
-    if filtro_fecha == 'hoy':
-        hoy = timezone.now().date()
-        noticias = noticias.filter(fecha__date=hoy)
-    elif filtro_fecha == 'semana':
-        hace_una_semana = timezone.now() - timedelta(days=7)
-        noticias = noticias.filter(fecha__gte=hace_una_semana)
-    elif filtro_fecha == 'mes':
-        hace_un_mes = timezone.now() - timedelta(days=30)
-        noticias = noticias.filter(fecha__gte=hace_un_mes)
-
-    noticias = noticias.order_by('-fecha', '-fecha_scraping')
-    
-    page = request.GET.get('page', 1)
-    per_page = request.GET.get('per_page', 10)  # valor por defecto
-    
-    # Validar y convertir per_page
-    try:
-        per_page = int(per_page)
-        if per_page not in [10, 20, 50]:
-            per_page = 10
-    except (ValueError, TypeError):
-        per_page = 10
-
-    paginator = Paginator(noticias, per_page)
-    try:
-        noticias_paginadas = paginator.page(page)
-    except PageNotAnInteger:
-        noticias_paginadas = paginator.page(1)
-    except EmptyPage:
-        noticias_paginadas = paginator.page(paginator.num_pages)
-
-    total_noticias = noticias.count()
-    noticias_con_imagen = noticias.exclude(imagen__isnull=True).exclude(imagen='').count()
-
-    context = {
-        'noticias': noticias_paginadas,
-        'total_noticias': total_noticias,
-        'noticias_con_imagen': noticias_con_imagen,
-        'filtro_actual': {
-            'imagen': filtro_imagen,
-            'fecha': filtro_fecha,
-            'busqueda': busqueda
-        }
-    }
-
-    return render(request, 'noticias/mundo.html', context)
-
-def ejecutar_scraping_mundo(request):
-    """
-    Llama al comando de scraping de Mundo
-    y devuelve el resultado en JSON.
-    """
-    if request.method == "POST":  # Seguridad: solo POST
-        buffer = io.StringIO()
-        try:
-            call_command("scrape_mundo", stdout=buffer)
-            return JsonResponse({"status": "ok", "log": buffer.getvalue()})
-        except Exception as e:
-            return JsonResponse({"status": "error", "error": str(e)})
-    return JsonResponse({"status": "error", "error": "Método no permitido"})
-
-#Lista noticias por categoria Tecnologia
 def tecnologia(request):
-    filtro_imagen = request.GET.get('con_imagen', False)
-    filtro_fecha = request.GET.get('fecha', 'todas')
-    busqueda = request.GET.get('q', '')
+    queryset = Noticia.objects.filter(Q(origen="elcomercio") | Q(origen="desconocido"), enlace__icontains="/tecnologia/")
+    return lista_noticias_helper(request, queryset, 'noticias/tecnologia.html')
 
-    # 🔹 Solo noticias de tecnologia
-    noticias = Noticia.objects.filter(Q(origen="elcomercio") | Q(origen="desconocido"), enlace__icontains="/tecnologia/")
-
-    if busqueda:
-        noticias = noticias.filter(
-            Q(titulo__icontains=busqueda) |
-            Q(autor__icontains=busqueda)
-        )
-
-    if filtro_imagen:
-        noticias = noticias.exclude(imagen__isnull=True).exclude(imagen='')
-
-    if filtro_fecha == 'hoy':
-        hoy = timezone.now().date()
-        noticias = noticias.filter(fecha__date=hoy)
-    elif filtro_fecha == 'semana':
-        hace_una_semana = timezone.now() - timedelta(days=7)
-        noticias = noticias.filter(fecha__gte=hace_una_semana)
-    elif filtro_fecha == 'mes':
-        hace_un_mes = timezone.now() - timedelta(days=30)
-        noticias = noticias.filter(fecha__gte=hace_un_mes)
-
-    noticias = noticias.order_by('-fecha', '-fecha_scraping')
-    
-    page = request.GET.get('page', 1)
-    per_page = request.GET.get('per_page', 10)  # valor por defecto
-    
-    # Validar y convertir per_page
-    try:
-        per_page = int(per_page)
-        if per_page not in [10, 20, 50]:
-            per_page = 10
-    except (ValueError, TypeError):
-        per_page = 10
-
-    paginator = Paginator(noticias, per_page)
-    try:
-        noticias_paginadas = paginator.page(page)
-    except PageNotAnInteger:
-        noticias_paginadas = paginator.page(1)
-    except EmptyPage:
-        noticias_paginadas = paginator.page(paginator.num_pages)
-
-    total_noticias = noticias.count()
-    noticias_con_imagen = noticias.exclude(imagen__isnull=True).exclude(imagen='').count()
-
-    context = {
-        'noticias': noticias_paginadas,
-        'total_noticias': total_noticias,
-        'noticias_con_imagen': noticias_con_imagen,
-        'filtro_actual': {
-            'imagen': filtro_imagen,
-            'fecha': filtro_fecha,
-            'busqueda': busqueda
-        }
-    }
-
-    return render(request, 'noticias/tecnologia.html', context)
-
-def ejecutar_scraping_tecnologia(request):
-    """
-    Llama al comando de scraping de tecnología
-    y devuelve el resultado en JSON.
-    """
-    if request.method == "POST":  # Seguridad: solo POST
-        buffer = io.StringIO()
-        try:
-            call_command("scrape_tecnologia", stdout=buffer)
-            return JsonResponse({"status": "ok", "log": buffer.getvalue()})
-        except Exception as e:
-            return JsonResponse({"status": "error", "error": str(e)})
-    return JsonResponse({"status": "error", "error": "Método no permitido"})
-
-'''
-PERU21
-'''
-#Lista todas las noticias con filtros y estadísticas
+# Vistas para Peru21 (usando el mismo helper)
 def peru21(request):
-    # Filtros
-    filtro_imagen = request.GET.get('con_imagen', False)
-    filtro_fecha = request.GET.get('fecha', 'todas')
-    busqueda = request.GET.get('q', '')
-    
-    # Query base
-    noticias = Noticia.objects.filter(origen='peru21')
-    
-    # Filtrar por búsqueda
-    if busqueda:
-        noticias = noticias.filter(
-            Q(titulo__icontains=busqueda) | 
-            Q(autor__icontains=busqueda)
-        )
-    
-    # Filtrar por imagen
-    if filtro_imagen:
-        noticias = noticias.exclude(imagen__isnull=True).exclude(imagen='')
-    
-    # Filtrar por fecha
-    if filtro_fecha == 'hoy':
-        hoy = timezone.now().date()
-        noticias = noticias.filter(fecha__date=hoy)
-    elif filtro_fecha == 'semana':
-        hace_una_semana = timezone.now() - timedelta(days=7)
-        noticias = noticias.filter(fecha__gte=hace_una_semana)
-    elif filtro_fecha == 'mes':
-        hace_un_mes = timezone.now() - timedelta(days=30)
-        noticias = noticias.filter(fecha__gte=hace_un_mes)
-    
-    # Ordenar por fecha
-    noticias = noticias.order_by('-fecha', '-fecha_scraping')
-    
-    page = request.GET.get('page', 1)
-    per_page = request.GET.get('per_page', 10)  # valor por defecto
-    
-    # Validar y convertir per_page
-    try:
-        per_page = int(per_page)
-        if per_page not in [10, 20, 50]:
-            per_page = 10
-    except (ValueError, TypeError):
-        per_page = 10
-
-    paginator = Paginator(noticias, per_page)
-    try:
-        noticias_paginadas = paginator.page(page)
-    except PageNotAnInteger:
-        noticias_paginadas = paginator.page(1)
-    except EmptyPage:
-        noticias_paginadas = paginator.page(paginator.num_pages)
-    
-    # Estadísticas
-    total_noticias = noticias.count()
-    noticias_con_imagen = noticias.exclude(imagen__isnull=True).exclude(imagen='').count()
-    
-    context = {
-        'noticias': noticias_paginadas,
-        'total_noticias': total_noticias,
-        'noticias_con_imagen': noticias_con_imagen,
-        'filtro_actual': {
-            'imagen': filtro_imagen,
-            'fecha': filtro_fecha,
-            'busqueda': busqueda
-        }
-    }
-    
-    return render(request, 'peru21/peru21.html', context)
+    queryset = Noticia.objects.filter(origen='peru21')
+    return lista_noticias_helper(request, queryset, 'peru21/peru21.html')
 
 def peru21d(request):
-    filtro_imagen = request.GET.get('con_imagen', False)
-    filtro_fecha = request.GET.get('fecha', 'todas')
-    busqueda = request.GET.get('q', '')
-
-    # 🔹 Solo noticias de Deportes21
-    noticias = Noticia.objects.filter(origen='peru21', enlace__icontains="/deportes/")
-
-    if busqueda:
-        noticias = noticias.filter(
-            Q(titulo__icontains=busqueda) |
-            Q(autor__icontains=busqueda)
-        )
-
-    if filtro_imagen:
-        noticias = noticias.exclude(imagen__isnull=True).exclude(imagen='')
-
-    if filtro_fecha == 'hoy':
-        hoy = timezone.now().date()
-        noticias = noticias.filter(fecha__date=hoy)
-    elif filtro_fecha == 'semana':
-        hace_una_semana = timezone.now() - timedelta(days=7)
-        noticias = noticias.filter(fecha__gte=hace_una_semana)
-    elif filtro_fecha == 'mes':
-        hace_un_mes = timezone.now() - timedelta(days=30)
-        noticias = noticias.filter(fecha__gte=hace_un_mes)
-
-    noticias = noticias.order_by('-fecha', '-fecha_scraping')
-    
-    page = request.GET.get('page', 1)
-    per_page = request.GET.get('per_page', 10)  # valor por defecto
-    
-    # Validar y convertir per_page
-    try:
-        per_page = int(per_page)
-        if per_page not in [10, 20, 50]:
-            per_page = 10
-    except (ValueError, TypeError):
-        per_page = 10
-
-    paginator = Paginator(noticias, per_page)
-    try:
-        noticias_paginadas = paginator.page(page)
-    except PageNotAnInteger:
-        noticias_paginadas = paginator.page(1)
-    except EmptyPage:
-        noticias_paginadas = paginator.page(paginator.num_pages)
-
-    total_noticias = noticias.count()
-    noticias_con_imagen = noticias.exclude(imagen__isnull=True).exclude(imagen='').count()
-
-    context = {
-        'noticias': noticias_paginadas,
-        'total_noticias': total_noticias,
-        'noticias_con_imagen': noticias_con_imagen,
-        'filtro_actual': {
-            'imagen': filtro_imagen,
-            'fecha': filtro_fecha,
-            'busqueda': busqueda
-        }
-    }
-
-    return render(request, 'peru21/peru21d.html', context)
+    queryset = Noticia.objects.filter(origen='peru21', enlace__icontains="/deportes/")
+    return lista_noticias_helper(request, queryset, 'peru21/peru21d.html')
 
 def peru21g(request):
-    filtro_imagen = request.GET.get('con_imagen', False)
-    filtro_fecha = request.GET.get('fecha', 'todas')
-    busqueda = request.GET.get('q', '')
-
-    # 🔹 Solo noticias de Gastronomia21
-    noticias = Noticia.objects.filter(origen='peru21', enlace__icontains="/gastronomia/")
-
-    if busqueda:
-        noticias = noticias.filter(
-            Q(titulo__icontains=busqueda) |
-            Q(autor__icontains=busqueda)
-        )
-
-    if filtro_imagen:
-        noticias = noticias.exclude(imagen__isnull=True).exclude(imagen='')
-
-    if filtro_fecha == 'hoy':
-        hoy = timezone.now().date()
-        noticias = noticias.filter(fecha__date=hoy)
-    elif filtro_fecha == 'semana':
-        hace_una_semana = timezone.now() - timedelta(days=7)
-        noticias = noticias.filter(fecha__gte=hace_una_semana)
-    elif filtro_fecha == 'mes':
-        hace_un_mes = timezone.now() - timedelta(days=30)
-        noticias = noticias.filter(fecha__gte=hace_un_mes)
-
-    noticias = noticias.order_by('-fecha', '-fecha_scraping')
-    
-    page = request.GET.get('page', 1)
-    per_page = request.GET.get('per_page', 10)  # valor por defecto
-    
-    # Validar y convertir per_page
-    try:
-        per_page = int(per_page)
-        if per_page not in [10, 20, 50]:
-            per_page = 10
-    except (ValueError, TypeError):
-        per_page = 10
-
-    paginator = Paginator(noticias, per_page)
-    try:
-        noticias_paginadas = paginator.page(page)
-    except PageNotAnInteger:
-        noticias_paginadas = paginator.page(1)
-    except EmptyPage:
-        noticias_paginadas = paginator.page(paginator.num_pages)
-
-    total_noticias = noticias.count()
-    noticias_con_imagen = noticias.exclude(imagen__isnull=True).exclude(imagen='').count()
-
-    context = {
-        'noticias': noticias_paginadas,
-        'total_noticias': total_noticias,
-        'noticias_con_imagen': noticias_con_imagen,
-        'filtro_actual': {
-            'imagen': filtro_imagen,
-            'fecha': filtro_fecha,
-            'busqueda': busqueda
-        }
-    }
-
-    return render(request, 'peru21/peru21g.html', context)
+    queryset = Noticia.objects.filter(origen='peru21', enlace__icontains="/gastronomia/")
+    return lista_noticias_helper(request, queryset, 'peru21/peru21g.html')
 
 def peru21i(request):
-    filtro_imagen = request.GET.get('con_imagen', False)
-    filtro_fecha = request.GET.get('fecha', 'todas')
-    busqueda = request.GET.get('q', '')
-
-    # 🔹 Solo noticias de Investigacion21
-    noticias = Noticia.objects.filter(origen='peru21', enlace__icontains="/investigacion/")
-
-    if busqueda:
-        noticias = noticias.filter(
-            Q(titulo__icontains=busqueda) |
-            Q(autor__icontains=busqueda)
-        )
-
-    if filtro_imagen:
-        noticias = noticias.exclude(imagen__isnull=True).exclude(imagen='')
-
-    if filtro_fecha == 'hoy':
-        hoy = timezone.now().date()
-        noticias = noticias.filter(fecha__date=hoy)
-    elif filtro_fecha == 'semana':
-        hace_una_semana = timezone.now() - timedelta(days=7)
-        noticias = noticias.filter(fecha__gte=hace_una_semana)
-    elif filtro_fecha == 'mes':
-        hace_un_mes = timezone.now() - timedelta(days=30)
-        noticias = noticias.filter(fecha__gte=hace_un_mes)
-
-    noticias = noticias.order_by('-fecha', '-fecha_scraping')
-    
-    page = request.GET.get('page', 1)
-    per_page = request.GET.get('per_page', 10)  # valor por defecto
-    
-    # Validar y convertir per_page
-    try:
-        per_page = int(per_page)
-        if per_page not in [10, 20, 50]:
-            per_page = 10
-    except (ValueError, TypeError):
-        per_page = 10
-
-    paginator = Paginator(noticias, per_page)
-    try:
-        noticias_paginadas = paginator.page(page)
-    except PageNotAnInteger:
-        noticias_paginadas = paginator.page(1)
-    except EmptyPage:
-        noticias_paginadas = paginator.page(paginator.num_pages)
-
-    total_noticias = noticias.count()
-    noticias_con_imagen = noticias.exclude(imagen__isnull=True).exclude(imagen='').count()
-
-    context = {
-        'noticias': noticias_paginadas,
-        'total_noticias': total_noticias,
-        'noticias_con_imagen': noticias_con_imagen,
-        'filtro_actual': {
-            'imagen': filtro_imagen,
-            'fecha': filtro_fecha,
-            'busqueda': busqueda
-        }
-    }
-
-    return render(request, 'peru21/peru21i.html', context)
+    queryset = Noticia.objects.filter(origen='peru21', enlace__icontains="/investigacion/")
+    return lista_noticias_helper(request, queryset, 'peru21/peru21i.html')
 
 def peru21l(request):
-    filtro_imagen = request.GET.get('con_imagen', False)
-    filtro_fecha = request.GET.get('fecha', 'todas')
-    busqueda = request.GET.get('q', '')
+    queryset = Noticia.objects.filter(origen='peru21', enlace__icontains="/lima/")
+    return lista_noticias_helper(request, queryset, 'peru21/peru21l.html')
 
-    # 🔹 Solo noticias de Lima21
-    noticias = Noticia.objects.filter(origen='peru21', enlace__icontains="/lima/")
+# Vista genérica para scraping
+def ejecutar_scraping_generico(request, command_name):
+    if request.method == "POST":
+        buffer = io.StringIO()
+        try:
+            call_command(command_name, stdout=buffer)
+            return JsonResponse({"status": "ok", "log": buffer.getvalue()})
+        except Exception as e:
+            return JsonResponse({"status": "error", "error": str(e)})
+    return JsonResponse({"status": "error", "error": "Método no permitido"})
 
-    if busqueda:
-        noticias = noticias.filter(
-            Q(titulo__icontains=busqueda) |
-            Q(autor__icontains=busqueda)
-        )
+# Asignar vistas de scraping específicas (puedes usar la genérica directamente en urls.py con parámetros)
+def ejecutar_scraping_lista_noticias(request):
+    return ejecutar_scraping_generico(request, "scrape_elcomercio")
 
-    if filtro_imagen:
-        noticias = noticias.exclude(imagen__isnull=True).exclude(imagen='')
+def ejecutar_scraping_politica(request):
+    return ejecutar_scraping_generico(request, "scrape_elcomercio_pol")
 
-    if filtro_fecha == 'hoy':
-        hoy = timezone.now().date()
-        noticias = noticias.filter(fecha__date=hoy)
-    elif filtro_fecha == 'semana':
-        hace_una_semana = timezone.now() - timedelta(days=7)
-        noticias = noticias.filter(fecha__gte=hace_una_semana)
-    elif filtro_fecha == 'mes':
-        hace_un_mes = timezone.now() - timedelta(days=30)
-        noticias = noticias.filter(fecha__gte=hace_un_mes)
+def ejecutar_scraping_economia(request):
+    return ejecutar_scraping_generico(request, "scrape_economia")
 
-    noticias = noticias.order_by('-fecha', '-fecha_scraping')
-    
-    page = request.GET.get('page', 1)
-    per_page = request.GET.get('per_page', 10)  # valor por defecto
-    
-    # Validar y convertir per_page
-    try:
-        per_page = int(per_page)
-        if per_page not in [10, 20, 50]:
-            per_page = 10
-    except (ValueError, TypeError):
-        per_page = 10
+def ejecutar_scraping_mundo(request):
+    return ejecutar_scraping_generico(request, "scrape_mundo")
 
-    paginator = Paginator(noticias, per_page)
-    try:
-        noticias_paginadas = paginator.page(page)
-    except PageNotAnInteger:
-        noticias_paginadas = paginator.page(1)
-    except EmptyPage:
-        noticias_paginadas = paginator.page(paginator.num_pages)
+def ejecutar_scraping_tecnologia(request):
+    return ejecutar_scraping_generico(request, "scrape_tecnologia")
 
-    total_noticias = noticias.count()
-    noticias_con_imagen = noticias.exclude(imagen__isnull=True).exclude(imagen='').count()
-
-    context = {
-        'noticias': noticias_paginadas,
-        'total_noticias': total_noticias,
-        'noticias_con_imagen': noticias_con_imagen,
-        'filtro_actual': {
-            'imagen': filtro_imagen,
-            'fecha': filtro_fecha,
-            'busqueda': busqueda
-        }
-    }
-
-    return render(request, 'peru21/peru21l.html', context)
+# Nota: Para Peru21, no vi vistas de scraping en tu código original, pero si las agregas, usa la misma genérica.
