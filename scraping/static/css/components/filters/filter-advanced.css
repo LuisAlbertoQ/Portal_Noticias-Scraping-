@@ -94,7 +94,7 @@
     }
     
     .filter-label {
-        color: var(--light-primary);
+        color: black;
     }
     
     .filter-stats {

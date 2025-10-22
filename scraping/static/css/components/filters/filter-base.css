@@ -87,7 +87,7 @@
 
 /* Etiqueta del filtro */
 .filter-label {
-    color: var(--text-color);
+    color: black;
     font-size: 0.85rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -98,7 +98,7 @@
 }
 
 .filter-label i {
-    color: var(--primary-color);
+    color: black;
     font-size: 0.9rem;
 }
 
