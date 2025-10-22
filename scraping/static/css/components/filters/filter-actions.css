@@ -53,7 +53,7 @@
     background: linear-gradient(135deg, var(--dark-primary), var(--accent-color));
     color: var(--light-primary);
      transform: translateY(-2px) scale(1.05);
-     box-shadow: 0 5px 15px var(--gold-30);
+    box-shadow: 0 5px 15px var(--primary-soft-30);
 }
 
 /* Botón limpiar filtros */
@@ -67,7 +67,7 @@
     background: var(--accent-color);
     color: var(--bg-white);
     transform: translateY(-2px) scale(1.05);
-     box-shadow: 0 5px 15px var(--gold-30);
+    box-shadow: 0 5px 15px var(--primary-soft-30);
 }
 
 /* Botón refresh/scraping */
@@ -90,7 +90,7 @@
     background: linear-gradient(135deg, var(--dark-primary), var(--accent-color));
     color: var(--light-primary);
     transform: scale(1.05) translateY(-2px);
-     box-shadow: 0 8px 25px var(--gold-30);
+    box-shadow: 0 8px 25px var(--primary-soft-30);
 }
 
 .filter-bar .refresh-btn:disabled {

@@ -65,7 +65,7 @@
 
 /* Botón cerrar tag */
 .filter-tag-close {
-    background: var(--gold-dark-30);
+    background: var(--primary-soft-dark-30);
     border: none;
     color: var(--text-color);
     width: 20px;

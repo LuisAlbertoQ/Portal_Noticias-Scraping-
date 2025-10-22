@@ -26,7 +26,7 @@
 
 .filter-stat-item:hover {
     transform: translateY(-2px);
-    box-shadow: 0 3px 10px var(--gold-15);
+    box-shadow: 0 3px 10px var(--primary-soft-15);
 }
 
 .filter-stat-item i {

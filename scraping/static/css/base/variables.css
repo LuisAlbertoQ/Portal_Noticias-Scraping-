@@ -20,16 +20,17 @@
     /* Variantes de colores */
     --dark-primary: #2980b9;
     --light-primary: #85c1e9;
-    /* Tonos adicionales (azules suaves que combinan con --primary-color) */
-    --gold: #7fbbe9; /* azul más suave */
-    --gold-05: rgba(127, 187, 233, 0.04);
-    --gold-10: rgba(127, 187, 233, 0.08);
-    --gold-15: rgba(127, 187, 233, 0.12);
-    --gold-20: rgba(127, 187, 233, 0.16);
-    --gold-25: rgba(127, 187, 233, 0.20);
-    --gold-30: rgba(127, 187, 233, 0.26);
-    --gold-40: rgba(127, 187, 233, 0.36);
-    --gold-dark-30: rgba(41, 128, 185, 0.18);
+    /* Tonos suaves secundarios que combinan con --primary-color */
+    /* Renombrado: anteriormente se llamaban --gold*; ahora --primary-soft* para mayor claridad semántica */
+    --primary-soft: #7fbbe9; /* azul m1s suave */
+    --primary-soft-05: rgba(127, 187, 233, 0.04);
+    --primary-soft-10: rgba(127, 187, 233, 0.08);
+    --primary-soft-15: rgba(127, 187, 233, 0.12);
+    --primary-soft-20: rgba(127, 187, 233, 0.16);
+    --primary-soft-25: rgba(127, 187, 233, 0.20);
+    --primary-soft-30: rgba(127, 187, 233, 0.26);
+    --primary-soft-40: rgba(127, 187, 233, 0.36);
+    --primary-soft-dark-30: rgba(41, 128, 185, 0.18);
 
     /* Variantes translúcidas del primary / accent usadas en filtros */
     --primary-10: rgba(52, 152, 219, 0.1);
