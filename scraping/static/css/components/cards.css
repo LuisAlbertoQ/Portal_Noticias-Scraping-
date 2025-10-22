@@ -41,7 +41,10 @@
     overflow: hidden;
     background: linear-gradient(45deg, var(--light-primary), #85c1e9);
     flex-shrink: 0;
-    max-height: 200px;
+    /* Usar aspect-ratio para que la imagen escale proporcionalmente en mobile */
+    height: auto;
+    aspect-ratio: 16 / 9;
+    max-height: none;
 }
 
 .news-card.large .image-container {
@@ -91,6 +94,52 @@
     color: var(--dark-primary);
     font-size: 3rem;
     background: linear-gradient(45deg, var(--bg-light), var(--light-primary));
+}
+
+/* Responsive: en pantallas pequeñas eliminamos alturas fijas para evitar
+   que las imágenes grandes se vean estiradas. Usamos aspect-ratio para
+   mantener proporción y permitir que las tarjetas reduzcan su altura
+   proporcionalmente al ancho del dispositivo. */
+@media (max-width: 768px) {
+    .news-card.large .image-container,
+    .news-card.medium .image-container,
+    .news-card.small .image-container,
+    .news-card .image-container {
+        height: auto;
+        aspect-ratio: 16 / 9;
+        max-height: none;
+    }
+
+    /* Asegurar que cualquier regla más específica aplicada en desktop se
+       anule en mobile */
+    .news-grid .news-card.large .image-container {
+        height: auto;
+    }
+
+    /* Fallback para navegadores que no manejan 'aspect-ratio' correctamente:
+       usamos el truco del padding-top (ratio box) y posicionamos la imagen
+       absolutamente dentro del contenedor para mantener proporción sin estirar. */
+    .news-card .image-container {
+        position: relative;
+    }
+
+    .news-card .image-container::before {
+        content: '';
+        display: block;
+        width: 100%;
+        padding-top: 56.25%; /* 16:9 */
+        pointer-events: none;
+    }
+
+    .news-card .image-container .news-image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center center;
+    }
 }
 
 /* Contenido */
