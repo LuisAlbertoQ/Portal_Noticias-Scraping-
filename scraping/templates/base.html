@@ -10,12 +10,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- CSS propio -->
-    <link rel="stylesheet" href="{% static 'css/noticias.css' %}?v=3">
-    <link rel="stylesheet" href="{% static 'css/filtros.css' %}?v=1">
-    <link rel="stylesheet" href="{% static 'css/filtros-ajustes.css' %}?v=1">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <!--<link rel="stylesheet" href="{% static 'css/filtros.css' %}?v=1">
+    <link rel="stylesheet" href="{% static 'css/filtros-ajustes.css' %}?v=1">-->
     
     <!-- CSS de filtros (debe estar en tu archivo noticias.css) -->
-    <link rel="stylesheet" href="{% static 'css/filtros.css' %}">
+    <!--<link rel="stylesheet" href="{% static 'css/filtros.css' %}">-->
     
     {% block extra_css %}{% endblock %}
 </head>
@@ -31,12 +31,14 @@
                 <div><i class="fas fa-clock"></i> Actualizado hoy</div>
                 <div><i class="fas fa-users"></i> Portal de Noticias</div>
             </div>
-        </div>
+    </div>
+    </div>
     </header>
     {% include 'includes/nav.html' %}
 
     <div class="container">
         <!-- Sistema de filtros mejorado -->
+        <div class="site-filter-area">
         <div class="filter-bar">
             <form method="GET" id="filter-form">
                 <div class="filter-container">
@@ -67,7 +69,7 @@
                                        value="{{ request.GET.fecha_desde }}" 
                                        max="{{ today|date:'Y-m-d' }}">
                             </div>
-                            <span style="color: white;">—</span>
+                            <span class="filter-separator">—</span>
                             <div class="date-input-wrapper">
                                 <i class="fas fa-calendar"></i>
                                 <input type="date" name="fecha_hasta" class="filter-input" 
@@ -134,9 +136,9 @@
             </form>
             
             <!-- Tags de filtros activos -->
-            {% if filtro_actual.fecha and filtro_actual.fecha != 'todas' or filtro_actual.imagen or filtro_actual.busqueda %}
+                {% if filtro_actual.fecha and filtro_actual.fecha != 'todas' or filtro_actual.imagen or filtro_actual.busqueda %}
             <div class="active-filters">
-                <span style="color: white; font-weight: 600; margin-right: 10px;">Filtros activos:</span>
+                <span class="active-filters-label">Filtros activos:</span>
                 
                 {% if filtro_actual.fecha and filtro_actual.fecha != 'todas' %}
                 <div class="filter-tag">
