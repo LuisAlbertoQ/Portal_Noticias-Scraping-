@@ -44,7 +44,7 @@
                 <div class="filter-container">
                     <!-- Filtro por fecha predefinida -->
                     <div class="filter-group">
-                        <label class="filter-label">
+                        <label for="fecha-select" class="filter-label">
                             <i class="fas fa-calendar-alt"></i> Período
                         </label>
                         <select name="fecha" class="filter-select" id="fecha-select">
@@ -58,33 +58,35 @@
                     </div>
                     
                     <!-- Rango de fechas personalizado (se muestra cuando se selecciona 'rango') -->
-                    <div class="filter-group" id="date-range-group" style="display: none;">
-                        <label class="filter-label">
+                    <fieldset class="filter-group" id="date-range-group" style="display: none;">
+                        <legend class="filter-label">
                             <i class="fas fa-calendar-week"></i> Desde - Hasta
-                        </label>
+                        </legend>
                         <div class="date-range-container">
                             <div class="date-input-wrapper">
                                 <i class="fas fa-calendar"></i>
                                 <input type="date" name="fecha_desde" class="filter-input" 
-                                       value="{{ request.GET.fecha_desde }}" 
-                                       max="{{ today|date:'Y-m-d' }}">
+                                    value="{{ request.GET.fecha_desde }}" 
+                                    max="{{ today|date:'Y-m-d' }}"
+                                    aria-label="Fecha desde">
                             </div>
                             <span class="filter-separator">—</span>
                             <div class="date-input-wrapper">
                                 <i class="fas fa-calendar"></i>
                                 <input type="date" name="fecha_hasta" class="filter-input" 
-                                       value="{{ request.GET.fecha_hasta }}" 
-                                       max="{{ today|date:'Y-m-d' }}">
+                                    value="{{ request.GET.fecha_hasta }}" 
+                                    max="{{ today|date:'Y-m-d' }}"
+                                    aria-label="Fecha hasta">
                             </div>
                         </div>
-                    </div>
+                    </fieldset>
                     
                     <!-- Filtro por imagen -->
                     <div class="filter-group">
-                        <label class="filter-label">
+                        <label for="con_imagen" class="filter-label">
                             <i class="fas fa-image"></i> Imágenes
                         </label>
-                        <select name="con_imagen" class="filter-select">
+                        <select name="con_imagen" class="filter-select" id="con_imagen">
                             <option value="" {% if not filtro_actual.imagen %}selected{% endif %}>Todas</option>
                             <option value="1" {% if filtro_actual.imagen %}selected{% endif %}>Solo con imágenes</option>
                         </select>
@@ -92,10 +94,11 @@
                     
                     <!-- Búsqueda -->
                     <div class="filter-group">
-                        <label class="filter-label">
+                        <label for="busqueda" class="filter-label">
                             <i class="fas fa-search"></i> Buscar
                         </label>
-                        <input type="text" 
+                        <input type="text"
+                               id="busqueda" 
                                name="q" 
                                class="filter-input" 
                                placeholder="Buscar noticias..." 
@@ -220,7 +223,9 @@
                                 </a>
                             {% endif %}
 
-                            <button class="share-btn" onclick="compartirNoticia('{{ noticia.titulo|escapejs }}', '{{ noticia.enlace|default:''|escapejs }}')">
+                            <button class="share-btn"
+                                    onclick="compartirNoticia('{{ noticia.titulo|escapejs }}', '{{ noticia.enlace|default:''|escapejs }}')"
+                                    aria-label="Compartir: {{ noticia.titulo }}">
                                 <i class="fas fa-share"></i>
                             </button>
                         </div>
