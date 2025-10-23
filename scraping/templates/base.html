@@ -278,7 +278,7 @@
     </div>
 
     <!-- JS propio -->
-    <script src="{% static 'js/noticias.js' %}"></script>
+    <script src="{% static 'js/noticias.js' %}" defer></script>
     
     <script>
         // Funciones específicas para filtros
@@ -298,21 +298,29 @@
             window.location.href = url.toString();
         }
         
-        // Mostrar/ocultar rango de fechas
-        document.getElementById('fecha-select').addEventListener('change', function() {
+        // Mostrar/ocultar rango de fechas con comprobaciones de existencia
+        (function () {
+            const fechaSelect = document.getElementById('fecha-select');
             const dateRangeGroup = document.getElementById('date-range-group');
-            if (this.value === 'rango') {
+
+            if (!fechaSelect) return;
+
+            fechaSelect.addEventListener('change', function() {
+                if (!dateRangeGroup) return;
+                if (this.value === 'rango') {
+                    dateRangeGroup.style.display = 'block';
+                } else {
+                    dateRangeGroup.style.display = 'none';
+                }
+            });
+
+            // Inicializar en carga si ya está en modo rango
+            if (dateRangeGroup && fechaSelect.value === 'rango') {
                 dateRangeGroup.style.display = 'block';
-            } else {
-                dateRangeGroup.style.display = 'none';
             }
-        });
-        
-        // Inicializar en carga si ya está en modo rango
-        if (document.getElementById('fecha-select').value === 'rango') {
-            document.getElementById('date-range-group').style.display = 'block';
-        }
+        })();
     </script>
+    <script src="{% static 'js/filter-bar-init.js' %}" defer></script>
     
     {% block extra_js %}{% endblock %}
 </body>

@@ -21,3 +21,15 @@
     margin-bottom: 15px;
     color: var(--text-color);
 }
+
+/* Mensaje cuando no hay resultados: contenido adicional consolidado desde filter-advanced.css */
+.no-news {
+    /* border migrado desde filter-advanced.css para evitar duplicado */
+    border: 1px solid rgba(55, 136, 212, 0.2);
+}
+
+.no-news p {
+    color: var(--text-muted);
+    font-size: 1rem;
+    margin-bottom: 20px;
+}
