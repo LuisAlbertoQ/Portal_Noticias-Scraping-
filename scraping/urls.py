@@ -14,8 +14,13 @@ urlpatterns = [
     path('scraping/tecnologia', views.ejecutar_scraping_tecnologia, name='scraping_tecnologia'),
     #Peru21
     path('peru21', views.peru21, name='peru21'),
+    path('scraping/peru21', views.ejecutar_scraping_peru21, name='scraping_peru21'),
     path('peru21/deportes', views.peru21d, name='peru21d'),
+    path('scraping/peru21/deportes', views.ejecutar_scraping_peru21_deportes, name='scraping_peru21_deportes'),
     path('peru21/gastronomia', views.peru21g, name='peru21g'),
+    path('scraping/peru21/gastronomia', views.ejecutar_scraping_peru21_gastronomia, name='scraping_peru21_gastronomia'),
     path('peru21/investigacion', views.peru21i, name='peru21i'),
+    path('scraping/peru21/investigacion', views.ejecutar_scraping_peru21_investigacion, name='scraping_peru21_investigacion'),
     path('peru21/lima', views.peru21l, name='peru21l'),
+    path('scraping/peru21/lima', views.ejecutar_scraping_peru21_lima, name='scraping_peru21_lima'),
 ]

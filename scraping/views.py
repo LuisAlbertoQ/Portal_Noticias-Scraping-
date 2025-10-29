@@ -214,6 +214,18 @@ def ejecutar_scraping_tecnologia(request):
 def ejecutar_scraping_peru21(request):
     return ejecutar_scraping_generico(request, "scrape_peru21")
 
+def ejecutar_scraping_peru21_deportes(request):
+    return ejecutar_scraping_generico(request, "scrape_peru21D")
+
+def ejecutar_scraping_peru21_gastronomia(request):
+    return ejecutar_scraping_generico(request, "scrape_peru21G")
+
+def ejecutar_scraping_peru21_investigacion(request):
+    return ejecutar_scraping_generico(request, "scrape_peru21I")
+
+def ejecutar_scraping_peru21_lima(request):
+    return ejecutar_scraping_generico(request, "scrape_peru21L")
+
 # ===== VISTA API PARA ESTADÍSTICAS (OPCIONAL) =====
 def estadisticas_noticias(request):
     """Vista opcional para obtener estadísticas de noticias vía API"""
