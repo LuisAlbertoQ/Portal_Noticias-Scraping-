@@ -24,6 +24,7 @@ Thumbs.db
 
 # Archivos de configuración de VSCode
 .vscode/
+.qodo/
 
 # Archivos de dependencias
 *.egg-info/

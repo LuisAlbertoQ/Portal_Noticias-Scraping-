@@ -3,7 +3,7 @@ from django.core.management import call_command
 import time
 import subprocess
 import sys
-import select
+import os
 import re
 from celery.exceptions import TimeoutError
 
@@ -199,13 +199,23 @@ def run_single_scrape(self, command_name):
         time.sleep(1)
         
         # Ejecutar comando y capturar output en tiempo real
+        # Configurar entorno UTF-8
+        env = os.environ.copy()
+        env['PYTHONIOENCODING'] = 'utf-8'
+        
+        creation_flags = 0
+        if sys.platform == 'win32':
+            creation_flags = subprocess.CREATE_NO_WINDOW
+        
         process = subprocess.Popen(
             [sys.executable, 'manage.py', command_name],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
-            bufsize=1,
-            universal_newlines=True
+            env=env,
+            encoding='utf-8',
+            errors='replace',
+            creationflags=creation_flags
         )
         
         # Variables para tracking de progreso REAL
@@ -280,66 +290,75 @@ def run_single_scrape(self, command_name):
             
             # 2. LEER OUTPUT EN TIEMPO REAL
             try:
-                ready, _, _ = select.select([process.stdout], [], [], 0.5)
-                if ready:
+                if sys.platform == 'win32':
+                    # Para Windows, usar readline() directamente sin select
                     line = process.stdout.readline()
-                    if line:
-                        line = line.strip()
-                        print(f"📝 {command_name}: {line}")
-                        
-                        # DETECTAR EVENTOS IMPORTANTES EN EL OUTPUT - VERSIÓN MEJORADA
-                        
-                        # Detectar "📰 Se encontraron X noticias..."
-                        if "📰 Se encontraron" in line and "noticias" in line:
-                            match = re.search(r'Se encontraron\s*(\d+)\s*noticias', line)
-                            if match:
-                                total_articles_found = int(match.group(1))
-                                print(f"🎯 Total de noticias detectadas: {total_articles_found}")
-                                processing_started = True
-                                if current_phase_index < 3:
-                                    current_phase_index = 3  # Fase de procesamiento
-                        
-                        # Detectar "📄 Procesando noticia X/Y"
-                        elif "📄 Procesando noticia" in line:
-                            # Extraer números: "Procesando noticia 5/17"
-                            match = re.search(r'noticia\s*(\d+)/(\d+)', line)
-                            if match:
-                                current_num = int(match.group(1))
-                                total_num = int(match.group(2))
-                                articles_processed = current_num
-                                
-                                # Actualizar total si es mayor
-                                if total_num > total_articles_found:
-                                    total_articles_found = total_num
-                                
-                                print(f"📄 Noticia procesada: {articles_processed}/{total_articles_found}")
-                        
-                        # Detectar "💾 Guardando X noticias..."
-                        elif "💾 Guardando" in line and "noticias" in line:
-                            if current_phase_index < 4:
-                                current_phase_index = 4  # Fase de guardado
-                                print("💾 Detectada fase de guardado")
-                        
-                        # Detectar "✅ Scraping de ... finalizado!"
-                        elif "✅ Scraping" in line and "finalizado" in line:
-                            if current_phase_index < len(phases) - 1:
-                                current_phase_index = len(phases) - 2
-                                print("✅ Detectada finalización")
-                        
-                        # DETECCIÓN ALTERNATIVA (por si falla la anterior)
-                        elif ("noticias" in line.lower() and 
-                            any(word in line.lower() for word in ["encontraron", "encontradas", "total"])):
-                            match = re.search(r'(\d+)\s*noticias', line)
-                            if match:
-                                total_articles_found = int(match.group(1))
-                                print(f"🎯 Total de noticias detectadas (alt): {total_articles_found}")
-                                processing_started = True
-                                if current_phase_index < 3:
-                                    current_phase_index = 3
-                        
-                        elif "procesando noticia" in line.lower():
-                            articles_processed += 1
-                            print(f"📄 Noticia procesada (alt): {articles_processed}")
+                else:
+                    # Para sistemas no-Windows, mantener el código original con select
+                    import select
+                    ready, _, _ = select.select([process.stdout], [], [], 0.5)
+                    if ready:
+                        line = process.stdout.readline()
+                    else:
+                        line = None
+                
+                if line:
+                    line = line.strip()
+                    print(f"📝 {command_name}: {line}")
+                    
+                    # DETECTAR EVENTOS IMPORTANTES EN EL OUTPUT - VERSIÓN MEJORADA
+                    
+                    # Detectar "📰 Se encontraron X noticias..."
+                    if "📰 Se encontraron" in line and "noticias" in line:
+                        match = re.search(r'Se encontraron\s*(\d+)\s*noticias', line)
+                        if match:
+                            total_articles_found = int(match.group(1))
+                            print(f"🎯 Total de noticias detectadas: {total_articles_found}")
+                            processing_started = True
+                            if current_phase_index < 3:
+                                current_phase_index = 3  # Fase de procesamiento
+                    
+                    # Detectar "📄 Procesando noticia X/Y"
+                    elif "📄 Procesando noticia" in line:
+                        # Extraer números: "Procesando noticia 5/17"
+                        match = re.search(r'noticia\s*(\d+)/(\d+)', line)
+                        if match:
+                            current_num = int(match.group(1))
+                            total_num = int(match.group(2))
+                            articles_processed = current_num
+                            
+                            # Actualizar total si es mayor
+                            if total_num > total_articles_found:
+                                total_articles_found = total_num
+                            
+                            print(f"📄 Noticia procesada: {articles_processed}/{total_articles_found}")
+                    
+                    # Detectar "💾 Guardando X noticias..."
+                    elif "💾 Guardando" in line and "noticias" in line:
+                        if current_phase_index < 4:
+                            current_phase_index = 4  # Fase de guardado
+                            print("💾 Detectada fase de guardado")
+                    
+                    # Detectar "✅ Scraping de ... finalizado!"
+                    elif "✅ Scraping" in line and "finalizado" in line:
+                        if current_phase_index < len(phases) - 1:
+                            current_phase_index = len(phases) - 2
+                            print("✅ Detectada finalización")
+                    
+                    # DETECCIÓN ALTERNATIVA (por si falla la anterior)
+                    elif ("noticias" in line.lower() and 
+                        any(word in line.lower() for word in ["encontraron", "encontradas", "total"])):
+                        match = re.search(r'(\d+)\s*noticias', line)
+                        if match:
+                            total_articles_found = int(match.group(1))
+                            print(f"🎯 Total de noticias detectadas (alt): {total_articles_found}")
+                            processing_started = True
+                            if current_phase_index < 3:
+                                current_phase_index = 3
+                    
+                    elif "procesando noticia" in line.lower():
+                        articles_processed += 1
+                        print(f"📄 Noticia procesada (alt): {articles_processed}")
                                 
             except (IOError, ValueError) as e:
                 print(f"⚠️ Error leyendo output: {e}")

@@ -1,0 +1,16 @@
+<!-- ============ TOP NAVBAR (SELECTOR DE PORTALES) ============ -->
+<nav class="top-navbar">
+    <div class="top-navbar-wrapper">
+        <a href="{% url 'lista_noticias' %}" 
+           class="portal-link {% if nav_type == 'comercio' %}active{% endif %}">
+            <i class="fas fa-newspaper"></i>
+            <span>El Comercio</span>
+        </a>
+        <!-- ELIMINADO: <span class="portal-separator">|</span> -->
+        <a href="{% url 'peru21' %}" 
+           class="portal-link {% if nav_type == 'peru21' %}active{% endif %}">
+            <i class="fas fa-newspaper"></i>
+            <span>Perú21</span>
+        </a>
+    </div>
+</nav>

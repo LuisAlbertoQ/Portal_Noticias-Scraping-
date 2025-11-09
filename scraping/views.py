@@ -1,4 +1,5 @@
 import io
+import logging
 from django.shortcuts import render
 from django.db.models import Q
 from django.utils import timezone
@@ -266,15 +267,16 @@ def estadisticas_noticias(request):
         'origen': origen
     })
 
+logger = logging.getLogger(__name__)
 def ver_estado_tarea(request, task_id):
-    """Ver el estado de una tarea Celery con MEJOR manejo de progreso"""
+    """Ver el estado de una tarea Celery con manejo robusto de errores."""
     try:
         task_result = AsyncResult(task_id)
         
         response_data = {
             'task_id': task_id,
             'status': task_result.status,
-            'state': task_result.state,  # ← AÑADIR ESTO
+            'state': task_result.state,
             'ready': task_result.ready(),
         }
         
@@ -289,22 +291,48 @@ def ver_estado_tarea(request, task_id):
                 response_data['failed'] = True
                 response_data['error'] = str(task_result.result)
         else:
-            # Tarea aún en progreso - MEJOR MANEJO DE PROGRESO
+            # Tarea aún en progreso - MANEJO ROBUSTO DE ERRORES
             response_data['completed'] = False
             
-            if hasattr(task_result, 'info') and task_result.info:
-                # Si la tarea reporta progreso con la estructura que esperamos
-                if isinstance(task_result.info, dict):
-                    response_data['progress'] = task_result.info
-                else:
-                    # Si info no es dict, crear estructura estándar
-                    response_data['progress'] = {
-                        'current': 50,  # Progreso por defecto
-                        'total': 100,
-                        'status': f'Tarea en progreso: {task_result.status}'
-                    }
-            else:
-                # Progreso basado en estado
+            # 🔥 MEJORA: Intentar obtener metadatos de múltiples formas
+            progress_data = None
+            
+            # Método 1: Usar task_result.info (el método estándar)
+            try:
+                if hasattr(task_result, 'info') and task_result.info:
+                    if isinstance(task_result.info, dict):
+                        progress_data = task_result.info
+                    else:
+                        # Si info no es dict, crear estructura estándar
+                        progress_data = {
+                            'current': 50,
+                            'total': 100,
+                            'status': f'Tarea en progreso: {task_result.status}'
+                        }
+            except Exception as e:
+                logger.warning(f"Error obteniendo info de tarea: {e}")
+            
+            # Método 2: Si el método 1 falló, intentar leer directamente del backend
+            if progress_data is None:
+                try:
+                    # Verificar si el backend tiene el método get
+                    if hasattr(task_result, 'backend') and hasattr(task_result.backend, 'get'):
+                        backend_data = task_result.backend.get(task_result.id)
+                        
+                        # El backend puede devolver diferentes estructuras
+                        if isinstance(backend_data, tuple) and len(backend_data) >= 3:
+                            # Estructura (status, traceback, result)
+                            _, _, meta = backend_data
+                            if isinstance(meta, dict):
+                                progress_data = meta
+                        elif isinstance(backend_data, dict):
+                            # Estructura directa con metadatos
+                            progress_data = backend_data
+                except Exception as e:
+                    logger.warning(f"Error leyendo del backend de Celery: {e}")
+            
+            # Método 3: Si todo falla, usar progreso basado en estado
+            if progress_data is None:
                 progress_map = {
                     'PENDING': 5,
                     'STARTED': 15, 
@@ -312,15 +340,33 @@ def ver_estado_tarea(request, task_id):
                 }
                 default_progress = progress_map.get(task_result.status, 25)
                 
-                response_data['progress'] = {
+                progress_data = {
                     'current': default_progress,
                     'total': 100,
-                    'status': f'Tarea en estado: {task_result.status}'
+                    'status': f'Tarea en estado: {task_result.status}',
+                    'command': 'scraping',
+                    'articles_processed': 0,
+                    'total_articles_found': 0
                 }
+            
+            # Asegurarnos de que progress_data sea un diccionario válido
+            if not isinstance(progress_data, dict):
+                logger.warning(f"progress_data no es un diccionario: {progress_data}")
+                progress_data = {
+                    'current': 25,
+                    'total': 100,
+                    'status': 'Procesando...',
+                    'command': 'scraping',
+                    'articles_processed': 0,
+                    'total_articles_found': 0
+                }
+            
+            response_data['progress'] = progress_data
         
         return JsonResponse(response_data)
         
     except Exception as e:
+        logger.error(f"Error en ver_estado_tarea: {e}")
         return JsonResponse({
             'status': 'ERROR',
             'error': str(e),

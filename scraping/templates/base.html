@@ -11,17 +11,14 @@
     
     <!-- CSS propio -->
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
-    <!--<link rel="stylesheet" href="{% static 'css/filtros.css' %}?v=1">
-    <link rel="stylesheet" href="{% static 'css/filtros-ajustes.css' %}?v=1">-->
-    
-    <!-- CSS de filtros (debe estar en tu archivo noticias.css) -->
-    <!--<link rel="stylesheet" href="{% static 'css/filtros.css' %}">-->
     
     {% block extra_css %}{% endblock %}
 </head>
 <body>
     {% csrf_token %}
+    
     <header class="header">
+        {% include 'includes/topnav.html' %}
         <div class="header-content">
             <div class="logo">
                 <i class="{% block header_icon %}fas fa-newspaper{% endblock %}"></i>
@@ -32,9 +29,10 @@
                 <div><i class="fas fa-clock"></i> Actualizado hoy</div>
                 <div><i class="fas fa-users"></i> Portal de Noticias</div>
             </div>
-    </div>
-    </div>
+        </div>
     </header>
+    
+    <!-- ============ NAVEGACIÓN DE SECCIONES ============ -->
     {% include 'includes/nav.html' %}
 
     <div class="container">
@@ -114,7 +112,7 @@
                         <button type="submit" class="filter-btn filter-btn-apply">
                             <i class="fas fa-filter"></i> Aplicar
                         </button>
-                        <button type="button" class="filter-btn filter-btn-clear" onclick="clearFilters()">
+                        <button type="button" class="filter-btn filter-btn-clear" id="clear-filters-btn">
                             <i class="fas fa-times"></i> Limpiar
                         </button>
                     </div>
@@ -148,7 +146,7 @@
                 <div class="filter-tag">
                     <i class="fas fa-calendar"></i>
                     <span>{{ filtro_actual.fecha|title }}</span>
-                    <button class="filter-tag-close" onclick="removeFilter('fecha')">&times;</button>
+                    <button class="filter-tag-close" data-filter-name="fecha">&times;</button>
                 </div>
                 {% endif %}
                 
@@ -156,7 +154,7 @@
                 <div class="filter-tag">
                     <i class="fas fa-image"></i>
                     <span>Con imágenes</span>
-                    <button class="filter-tag-close" onclick="removeFilter('con_imagen')">&times;</button>
+                    <button class="filter-tag-close" data-filter-name="con_imagen">&times;</button>
                 </div>
                 {% endif %}
                 
@@ -164,7 +162,7 @@
                 <div class="filter-tag">
                     <i class="fas fa-search"></i>
                     <span>"{{ filtro_actual.busqueda }}"</span>
-                    <button class="filter-tag-close" onclick="removeFilter('q')">&times;</button>
+                    <button class="filter-tag-close" data-filter-name="q">&times;</button>
                 </div>
                 {% endif %}
             </div>
@@ -284,50 +282,7 @@
     </div>
 
     <!-- JS propio -->
-    <script src="{% static 'js/noticias.js' %}" defer></script>
-    
-    <script>
-        // Funciones específicas para filtros
-        function clearFilters() {
-            const url = new URL(window.location);
-            url.search = '';
-            window.location.href = url.toString();
-        }
-        
-        function removeFilter(filterName) {
-            const url = new URL(window.location);
-            url.searchParams.delete(filterName);
-            if (filterName === 'fecha') {
-                url.searchParams.delete('fecha_desde');
-                url.searchParams.delete('fecha_hasta');
-            }
-            window.location.href = url.toString();
-        }
-        
-        // Mostrar/ocultar rango de fechas con comprobaciones de existencia
-        (function () {
-            const fechaSelect = document.getElementById('fecha-select');
-            const dateRangeGroup = document.getElementById('date-range-group');
-
-            if (!fechaSelect) return;
-
-            fechaSelect.addEventListener('change', function() {
-                if (!dateRangeGroup) return;
-                if (this.value === 'rango') {
-                    dateRangeGroup.style.display = 'block';
-                } else {
-                    dateRangeGroup.style.display = 'none';
-                }
-            });
-
-            // Inicializar en carga si ya está en modo rango
-            if (dateRangeGroup && fechaSelect.value === 'rango') {
-                dateRangeGroup.style.display = 'block';
-            }
-        })();
-    </script>
-    <script src="{% static 'js/filter-bar-init.js' %}" defer></script>
-    
+    <script type="module" src="{% static 'js/app.js' %}"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

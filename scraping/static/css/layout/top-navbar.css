@@ -1,0 +1,110 @@
+/* ===== TOP NAVBAR - INTEGRADO SIN EFECTOS DE CAPA ===== */
+
+.top-navbar {
+    background: transparent; /* Hereda del header padre */
+    border-bottom: none;
+    box-shadow: none;
+    /* ELIMINAR sticky - El header padre lo controla */
+    position: static;
+    z-index: auto;
+    -webkit-backdrop-filter: none; /* Sin efecto glass */
+    backdrop-filter: none;
+}
+
+.top-navbar-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 8px 15px; /* Reducido verticalmente */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+}
+
+/* ELIMINAR separador */
+.portal-separator {
+    display: none !important;
+}
+
+/* Enlaces base */
+.portal-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 24px;
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    border-radius: 30px;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.portal-link i {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+.portal-link:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.portal-link.active {
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.4);
+    font-weight: 700;
+}
+
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 768px) {
+    .top-navbar-wrapper {
+        padding: 6px 10px !important; /* MÍNIMO espacio */
+        gap: 15px;
+    }
+    
+    .portal-link {
+        width: 44px !important;
+        height: 44px !important;
+        padding: 0 !important;
+        border-radius: 50%;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .portal-link span {
+        display: none;
+    }
+    
+    .portal-link i {
+        font-size: 1.3rem;
+        margin: 0 !important;
+    }
+    
+    .portal-link.active {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.08);
+    }
+}
+
+@media (max-width: 480px) {
+    .top-navbar-wrapper {
+        padding: 4px 8px !important;
+        gap: 10px;
+    }
+    
+    .portal-link {
+        width: 40px !important;
+        height: 40px !important;
+    }
+    
+    .portal-link i {
+        font-size: 1.2rem;
+    }
+}
