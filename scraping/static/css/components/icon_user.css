@@ -1,0 +1,74 @@
+/* Botón flotante usuario */
+.user-fab {
+    position: fixed;
+    bottom: 25px;
+    right: 12px;
+    z-index: 9999;
+}
+
+.fab-checkbox {
+    display: none;
+}
+
+.fab-main {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--primary-gradient);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px var(--shadow-medium);
+    transition: transform .2s;
+}
+
+.fab-main:hover {
+    transform: scale(1.1);
+}
+
+.fab-menu {
+    position: absolute;
+    bottom: 70px;
+    right: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .3s;
+}
+
+.fab-checkbox:checked~.fab-menu {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.fab-item,
+.fab-item-form button {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: var(--primary-gradient);
+    color: var(--text-white);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px var(--shadow-medium);
+    transition: background .2s;
+}
+
+.fab-item:hover,
+.fab-item-form button:hover {
+    background: var(--primary-soft-40);
+}
+
+.fab-item-form {
+    margin: 0;
+    padding: 0;
+}

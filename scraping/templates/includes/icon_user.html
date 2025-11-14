@@ -1,0 +1,21 @@
+<!-- Botón flotante de usuario -->
+<div class="user-fab">
+  <input type="checkbox" id="fab-toggle" class="fab-checkbox" />
+  <label for="fab-toggle" class="fab-main" title="Menú de usuario">
+    <i class="fas fa-user-circle"></i>
+  </label>
+  <div class="fab-menu">
+    <a href="{% url 'bienvenida' %}" class="fab-item" title="Inicio">
+      <i class="fa-solid fa-house-user"></i>
+    </a>
+    <a href="{% url 'profile' %}" class="fab-item" title="Ver perfil">
+      <i class="fas fa-user"></i>
+    </a>
+    <form method="post" action="{% url 'logout' %}" class="fab-item-form">
+      {% csrf_token %}
+      <button type="submit" class="fab-item" title="Cerrar sesión">
+        <i class="fas fa-sign-out-alt"></i>
+      </button>
+    </form>
+  </div>
+</div>

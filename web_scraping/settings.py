@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'scraping',
+    'accounts',
 ]
 
 MIDDLEWARE = [
@@ -127,6 +128,7 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / "scraping/static",
+    BASE_DIR / "accounts/static",
 ]
 
 # Default primary key field type
@@ -149,3 +151,14 @@ CELERY_BEAT_SCHEDULE = {
 # líneas para persistencia
 CELERY_BEAT_SCHEDULE_FILENAME = 'celerybeat-schedule'
 CELERY_BEAT_SCHEDULER = 'celery.beat:PersistentScheduler'
+
+# Redirecciones después de login/logout
+LOGIN_REDIRECT_URL = 'lista_noticias'  # Cambié esto para que coincida con tu vista
+LOGOUT_REDIRECT_URL = 'bienvenida'     # Cambié para usar el nombre de la URL
+
+# Para proteger las vistas de scraping
+LOGIN_URL = '/accounts/login/'
+
+SESSION_COOKIE_AGE = 3600  # 1 hora
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True

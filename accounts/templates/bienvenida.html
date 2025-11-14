@@ -1,0 +1,102 @@
+{% extends 'base_auth.html' %}
+{% load static %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>Bienvenido al NewsMiner</h1>
+            <p>Explora las últimas noticias de El Comercio y Perú21 en un solo lugar</p>
+        </div>
+    </section>
+
+    <!-- Content Section -->
+    <div class="container">
+        {% if not user.is_authenticated %}
+            <div class="card welcome-card">
+                <div class="card-body">
+                    <h2>Comienza a explorar</h2>
+                    <p>Regístrate o inicia sesión para acceder a todas las funcionalidades</p>
+                    
+                    <div class="welcome-actions">
+                        <a href="{% url 'register' %}" class="btn btn-primary">
+                            Registrarse
+                        </a>
+                        <a href="{% url 'login' %}" class="btn btn-secondary">
+                            Iniciar Sesión
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="grid grid-2">
+                <!-- Welcome Card -->
+                <div class="card card-hover">
+                    <div class="card-body">
+                        <h2>¡Hola {{ user.username }}!</h2>
+                        <p>Estás listo para explorar las últimas noticias</p>
+                        <a href="{% url 'lista_noticias' %}" class="btn btn-primary">
+                            Ver Noticias
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Stats Card -->
+                <div class="card card-hover">
+                    <div class="card-body">
+                        <h3>Estadísticas</h3>
+                        <div class="stats-grid">
+                            <div class="stats-item">
+                                <div class="stats-number">{{ total_noticias }}</div>
+                                <div class="stats-label">Noticias</div>
+                            </div>
+                            <div class="stats-item">
+                                <div class="stats-number success">{{ noticias_con_imagen }}</div>
+                                <div class="stats-label">Con imagen</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Features Section -->
+            <div class="features-section">
+                <h2>Funcionalidades</h2>
+                
+                <div class="features-grid">
+                    <div class="card card-hover feature-card">
+                        <div class="card-body">
+                            <div class="feature-icon secondary">
+                                <span>📰</span>
+                            </div>
+                            <h3>Noticias Actualizadas</h3>
+                            <p>Accede a las últimas noticias de las principales fuentes</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card card-hover feature-card">
+                        <div class="card-body">
+                            <div class="feature-icon primary">
+                                <span>🔍</span>
+                            </div>
+                            <h3>Búsqueda Avanzada</h3>
+                            <p>Encuentra noticias específicas con filtros avanzados</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card card-hover feature-card">
+                        <div class="card-body">
+                            <div class="feature-icon success">
+                                <span>📊</span>
+                            </div>
+                            <h3>Análisis de Datos</h3>
+                            <p>Visualiza estadísticas y tendencias de noticias</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

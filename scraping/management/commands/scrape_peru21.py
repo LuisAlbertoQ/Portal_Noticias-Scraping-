@@ -10,6 +10,13 @@ from django.utils import timezone
 class Command(BaseCommand):
     help = 'Scrapea noticias de Perú21'
 
+    def safe_write(self, message, style=None, ending='\n'):
+        """Escribe a stdout con flush inmediato para evitar bloqueos"""
+        if style:
+            message = style(message)
+        self.stdout.write(message, ending=ending)
+        self.stdout.flush()
+
     def obtener_imagen_peru21(self, noticia_element):
         """Obtiene la imagen principal de cada noticia"""
         try:
@@ -20,7 +27,7 @@ class Command(BaseCommand):
                     src = "https://peru21.pe" + src
                 return src.replace("&amp;", "&")
         except Exception as e:
-            self.stdout.write(f"⚠️ Error obteniendo imagen: {e}")
+            self.safe_write(f"⚠️ Error obteniendo imagen: {e}")
         return None
 
     def obtener_enlace_noticia(self, noticia_element):
@@ -61,12 +68,12 @@ class Command(BaseCommand):
             page = context.new_page()
 
             try:
-                self.stdout.write("🌐 Navegando a Perú21...")
+                self.safe_write("🌐 Navegando a Perú21...")
                 page.goto("https://peru21.pe", timeout=60000, wait_until="domcontentloaded")
                 page.wait_for_selector("article.node--type-article", timeout=15000)
 
                 total = page.locator("article.node--type-article").count()
-                self.stdout.write(f"📰 Se encontraron {total} artículos.")
+                self.safe_write(f"📰 Se encontraron {total} artículos.")
 
                 for i in range(total):
                     try:
@@ -109,20 +116,20 @@ class Command(BaseCommand):
                             'imagen': imagen,
                             'enlace': enlace
                         })
-                        self.stdout.write(f"  ✅ {titulo[:60]}...")
+                        self.safe_write(f"  ✅ {titulo[:60]}...")
 
                     except Exception:
                         noticias_saltadas += 1
                         continue
 
             except Exception as e:
-                self.stdout.write(self.style.ERROR(f"❌ Error durante el scraping: {e}"))
+                self.safe_write(self.style.ERROR(f"❌ Error durante el scraping: {e}"))
             finally:
                 browser.close()
 
         # Guardar en base de datos
         if noticias_para_guardar:
-            self.stdout.write(f"💾 Guardando {len(noticias_para_guardar)} noticias...")
+            self.safe_write(f"💾 Guardando {len(noticias_para_guardar)} noticias...")
             noticias_nuevas = 0
             noticias_actualizadas = 0
             errores = 0
@@ -147,7 +154,7 @@ class Command(BaseCommand):
 
                         if created:
                             noticias_nuevas += 1
-                            self.stdout.write(f"  ✅ Nueva: {titulo[:50]}...")
+                            self.safe_write(f"  ✅ Nueva: {titulo[:50]}...")
                         else:
                             actualizado = False
 
@@ -176,20 +183,20 @@ class Command(BaseCommand):
                             if actualizado:
                                 noticia.save()
                                 noticias_actualizadas += 1
-                                self.stdout.write(f"  🔄 Actualizada: {titulo[:50]}...")
+                                self.safe_write(f"  🔄 Actualizada: {titulo[:50]}...")
                             else:
-                                self.stdout.write(f"  ⚪ Existente: {titulo[:50]}...")
+                                self.safe_write(f"  ⚪ Existente: {titulo[:50]}...")
 
                     except Exception as e:
                         errores += 1
-                        self.stdout.write(f"  ❌ Error guardando: {e}")
+                        self.safe_write(f"  ❌ Error guardando: {e}")
                         continue
 
                 # 📊 Resumen final
-                self.stdout.write(self.style.SUCCESS("📊 Resumen final:"))
-                self.stdout.write(f"  ✅ Noticias nuevas: {noticias_nuevas}")
-                self.stdout.write(f"  🔄 Noticias actualizadas: {noticias_actualizadas}")
-                self.stdout.write(f"  ⚪ Saltadas / sin título: {noticias_saltadas}")
-                self.stdout.write(f"  ❌ Errores al guardar: {errores}")
+                self.safe_write(self.style.SUCCESS("📊 Resumen final:"))
+                self.safe_write(f"  ✅ Noticias nuevas: {noticias_nuevas}")
+                self.safe_write(f"  🔄 Noticias actualizadas: {noticias_actualizadas}")
+                self.safe_write(f"  ⚪ Saltadas / sin título: {noticias_saltadas}")
+                self.safe_write(f"  ❌ Errores al guardar: {errores}")
 
-        self.stdout.write(self.style.SUCCESS("✅ Scraping finalizado!"))
+        self.safe_write(self.style.SUCCESS("✅ Scraping finalizado!"))

@@ -3,6 +3,8 @@ from django.core.management import call_command
 import time
 import subprocess
 import sys
+import threading
+import queue
 import os
 import re
 from celery.exceptions import TimeoutError
@@ -28,8 +30,8 @@ def run_single_scrape(self, command_name):
         # Configuración MEJORADA con progreso por noticias
         command_config = {
             'scrape_elcomercio': {
-                'timeout': 600,  # 10 minutos
-                'estimated_articles': 40,
+                'timeout': 900,
+                'estimated_articles': 80,
                 'phases': [
                     (5, "🔄 Iniciando scraping El Comercio..."),
                     (15, "🌐 Navegando a portada principal..."),
@@ -41,7 +43,7 @@ def run_single_scrape(self, command_name):
                 ]
             },
             'scrape_economia': {
-                'timeout': 480,  # 8 minutos
+                'timeout': 480,
                 'estimated_articles': 25,
                 'phases': [
                     (5, "🔄 Iniciando scraping Economía..."),
@@ -54,7 +56,7 @@ def run_single_scrape(self, command_name):
                 ]
             },
             'scrape_elcomercio_pol': {
-                'timeout': 480,  # 8 minutos
+                'timeout': 480,
                 'estimated_articles': 25,
                 'phases': [
                     (5, "🔄 Iniciando scraping Política..."),
@@ -67,7 +69,7 @@ def run_single_scrape(self, command_name):
                 ]
             },
             'scrape_mundo': {
-                'timeout': 480,  # 8 minutos
+                'timeout': 480,
                 'estimated_articles': 25,
                 'phases': [
                     (5, "🔄 Iniciando scraping Mundo..."),
@@ -80,7 +82,7 @@ def run_single_scrape(self, command_name):
                 ]
             },
             'scrape_tecnologia': {
-                'timeout': 480,  # 8 minutos
+                'timeout': 480,
                 'estimated_articles': 25,
                 'phases': [
                     (5, "🔄 Iniciando scraping Tecnología..."),
@@ -93,7 +95,7 @@ def run_single_scrape(self, command_name):
                 ]
             },
             'scrape_peru21': {
-                'timeout': 1800,  # 30 minutos (basado en tus tiempos reales)
+                'timeout': 1800,
                 'estimated_articles': 50,
                 'phases': [
                     (5, "🔄 Iniciando scraping Peru21..."),
@@ -106,7 +108,7 @@ def run_single_scrape(self, command_name):
                 ]
             },
             'scrape_peru21D': {
-                'timeout': 1800,  # 30 minutos
+                'timeout': 1800,
                 'estimated_articles': 30,
                 'phases': [
                     (5, "🔄 Iniciando scraping Deportes..."),
@@ -119,7 +121,7 @@ def run_single_scrape(self, command_name):
                 ]
             },
             'scrape_peru21G': {
-                'timeout': 1800,  # 30 minutos
+                'timeout': 1800,
                 'estimated_articles': 25,
                 'phases': [
                     (5, "🔄 Iniciando scraping Gastronomía..."),
@@ -132,7 +134,7 @@ def run_single_scrape(self, command_name):
                 ]
             },
             'scrape_peru21I': {
-                'timeout': 1800,  # 30 minutos
+                'timeout': 1800,
                 'estimated_articles': 20,
                 'phases': [
                     (5, "🔄 Iniciando scraping Investigación..."),
@@ -145,7 +147,7 @@ def run_single_scrape(self, command_name):
                 ]
             },
             'scrape_peru21L': {
-                'timeout': 1800,  # 30 minutos
+                'timeout': 1800,
                 'estimated_articles': 30,
                 'phases': [
                     (5, "🔄 Iniciando scraping Lima..."),
@@ -198,7 +200,6 @@ def run_single_scrape(self, command_name):
         )
         time.sleep(1)
         
-        # Ejecutar comando y capturar output en tiempo real
         # Configurar entorno UTF-8
         env = os.environ.copy()
         env['PYTHONIOENCODING'] = 'utf-8'
@@ -207,6 +208,18 @@ def run_single_scrape(self, command_name):
         if sys.platform == 'win32':
             creation_flags = subprocess.CREATE_NO_WINDOW
         
+        # Función del hilo lector
+        def _reader_thread(pipe, output_queue):
+            """Hilo que lee la salida del proceso sin bloquear"""
+            try:
+                for line in iter(pipe.readline, ''):
+                    if line:
+                        output_queue.put(line.strip())
+            finally:
+                output_queue.put(None)  # Señal de fin
+                pipe.close()
+        
+        # Iniciar proceso con buffer line-buffered
         process = subprocess.Popen(
             [sys.executable, 'manage.py', command_name],
             stdout=subprocess.PIPE,
@@ -215,21 +228,25 @@ def run_single_scrape(self, command_name):
             env=env,
             encoding='utf-8',
             errors='replace',
+            bufsize=1,  # CRÍTICO: Line-buffered
             creationflags=creation_flags
         )
         
-        # Variables para tracking de progreso REAL
+        # Configurar hilo de lectura
+        output_queue = queue.Queue()
+        reader_thread = threading.Thread(target=_reader_thread, args=(process.stdout, output_queue))
+        reader_thread.daemon = True
+        reader_thread.start()
+        
+        print(f"🔄 Comando {command_name} ejecutándose (PID: {process.pid})")
+        
+        # Variables de seguimiento
         articles_processed = 0
         total_articles_found = 0
         last_articles_count = 0
         processing_started = False
         
-        print(f"🔄 Comando {command_name} ejecutándose (PID: {process.pid})")
-        
-        # FASE 2: Monitoreo INTELIGENTE con lectura de output
-        check_interval = 3  # Segundos entre checks
-        
-        def update_progress(force_update=False):
+        def update_progress():
             """Actualizar progreso basado en noticias procesadas"""
             nonlocal current_phase_index
             
@@ -239,19 +256,15 @@ def run_single_scrape(self, command_name):
             # PROGRESO REAL BASADO EN NOTICIAS
             if processing_started and total_articles_found > 0:
                 if articles_processed > 0:
-                    # Calcular progreso entre 40% y 85% basado en noticias
                     article_ratio = articles_processed / total_articles_found
                     article_progress = 40 + (article_ratio * 45)  # 40% a 85%
                     current_progress = min(85, int(article_progress))
                     current_status = f"📄 Procesando noticias ({articles_processed}/{total_articles_found})"
                 
-                # Avanzar a fase de guardado si se procesaron todas las noticias
                 if articles_processed >= total_articles_found and total_articles_found > 0:
                     if current_phase_index < 4:
-                        current_phase_index = 4  # Fase de guardado
-                        current_progress, current_status = phases[current_phase_index]
+                        current_phase_index = 4
             
-            # Actualizar estado
             self.update_state(
                 state='PROGRESS',
                 meta={
@@ -267,134 +280,70 @@ def run_single_scrape(self, command_name):
                 }
             )
             
-            # Log solo si hay cambio significativo
-            if force_update or articles_processed != last_articles_count:
+            if articles_processed != last_articles_count:
                 print(f"📊 Progreso: {current_progress}% - {current_status} "
                       f"(Noticias: {articles_processed}/{total_articles_found})")
         
-        # Bucle principal de monitoreo
         last_progress_update = time.time()
         
-        while process.poll() is None:  # Mientras el proceso esté activo
+        # Bucle principal de monitoreo (SIMPLIFICADO - SIN select)
+        while True:
             elapsed = time.time() - start_time
+            time_limit = timeout + 60
             
-            # 1. PROTECCIÓN POR TIMEOUT TOTAL
-            if elapsed > timeout:
-                print(f"⏰ Timeout alcanzado después de {timeout}s")
-                process.terminate()
-                try:
-                    process.wait(timeout=10)  # Esperar 10s para terminación graceful
-                except subprocess.TimeoutExpired:
-                    process.kill()  # Forzar terminación
-                raise TimeoutError(f"El comando {command_name} excedió el tiempo límite de {timeout} segundos")
+            # Timeout con margen de seguridad
+            if elapsed > time_limit:
+                print(f"⏰ Timeout alcanzado: {elapsed}s > {time_limit}s")
+                process.kill()
+                reader_thread.join(timeout=2)
+                raise TimeoutError(f"Tiempo límite excedido: {time_limit}s")
             
-            # 2. LEER OUTPUT EN TIEMPO REAL
+            # LEER OUTPUT SOLO DEL HILO (sin bloquear)
             try:
-                if sys.platform == 'win32':
-                    # Para Windows, usar readline() directamente sin select
-                    line = process.stdout.readline()
-                else:
-                    # Para sistemas no-Windows, mantener el código original con select
-                    import select
-                    ready, _, _ = select.select([process.stdout], [], [], 0.5)
-                    if ready:
-                        line = process.stdout.readline()
-                    else:
-                        line = None
+                line = output_queue.get_nowait()
+                if line is None:  # Fin del stream
+                    break
+                    
+                print(f"📝 {command_name}: {line}")
                 
-                if line:
-                    line = line.strip()
-                    print(f"📝 {command_name}: {line}")
-                    
-                    # DETECTAR EVENTOS IMPORTANTES EN EL OUTPUT - VERSIÓN MEJORADA
-                    
-                    # Detectar "📰 Se encontraron X noticias..."
-                    if "📰 Se encontraron" in line and "noticias" in line:
-                        match = re.search(r'Se encontraron\s*(\d+)\s*noticias', line)
-                        if match:
-                            total_articles_found = int(match.group(1))
-                            print(f"🎯 Total de noticias detectadas: {total_articles_found}")
-                            processing_started = True
-                            if current_phase_index < 3:
-                                current_phase_index = 3  # Fase de procesamiento
-                    
-                    # Detectar "📄 Procesando noticia X/Y"
-                    elif "📄 Procesando noticia" in line:
-                        # Extraer números: "Procesando noticia 5/17"
-                        match = re.search(r'noticia\s*(\d+)/(\d+)', line)
-                        if match:
-                            current_num = int(match.group(1))
-                            total_num = int(match.group(2))
-                            articles_processed = current_num
-                            
-                            # Actualizar total si es mayor
-                            if total_num > total_articles_found:
-                                total_articles_found = total_num
-                            
-                            print(f"📄 Noticia procesada: {articles_processed}/{total_articles_found}")
-                    
-                    # Detectar "💾 Guardando X noticias..."
-                    elif "💾 Guardando" in line and "noticias" in line:
-                        if current_phase_index < 4:
-                            current_phase_index = 4  # Fase de guardado
-                            print("💾 Detectada fase de guardado")
-                    
-                    # Detectar "✅ Scraping de ... finalizado!"
-                    elif "✅ Scraping" in line and "finalizado" in line:
-                        if current_phase_index < len(phases) - 1:
-                            current_phase_index = len(phases) - 2
-                            print("✅ Detectada finalización")
-                    
-                    # DETECCIÓN ALTERNATIVA (por si falla la anterior)
-                    elif ("noticias" in line.lower() and 
-                        any(word in line.lower() for word in ["encontraron", "encontradas", "total"])):
-                        match = re.search(r'(\d+)\s*noticias', line)
-                        if match:
-                            total_articles_found = int(match.group(1))
-                            print(f"🎯 Total de noticias detectadas (alt): {total_articles_found}")
-                            processing_started = True
-                            if current_phase_index < 3:
-                                current_phase_index = 3
-                    
-                    elif "procesando noticia" in line.lower():
-                        articles_processed += 1
-                        print(f"📄 Noticia procesada (alt): {articles_processed}")
-                                
-            except (IOError, ValueError) as e:
-                print(f"⚠️ Error leyendo output: {e}")
-                # Continuar a pesar del error de lectura
+                # DETECTAR EVENTOS (regex mejorados)
+                if "Se encontraron" in line and "noticias" in line:
+                    match = re.search(r'Se encontraron\s+(\d+)\s+noticias', line)
+                    if match:
+                        total_articles_found = int(match.group(1))
+                        processing_started = True
+                        print(f"🎯 Total de noticias detectadas: {total_articles_found}")
+                
+                elif "Procesando noticia" in line:
+                    match = re.search(r'noticia\s+(\d+)/(\d+)', line)
+                    if match:
+                        articles_processed = int(match.group(1))
+                        total_num = int(match.group(2))
+                        if total_num > total_articles_found:
+                            total_articles_found = total_num
+                        print(f"📄 Noticia procesada: {articles_processed}/{total_articles_found}")
+                        
+            except queue.Empty:
+                # No hay datos, verificar si el proceso terminó
+                if process.poll() is not None and output_queue.empty():
+                    break
             
-            # 3. AVANZAR FASES POR TIEMPO (fallback)
-            if not processing_started and current_phase_index < 3:
-                if elapsed > (timeout * 0.2):  # 20% del tiempo
-                    current_phase_index = 1  # Navegación
-                if elapsed > (timeout * 0.4):  # 40% del tiempo
-                    current_phase_index = 2  # Carga
-                if elapsed > (timeout * 0.6):  # 60% del tiempo
-                    current_phase_index = 3  # Procesamiento
-                    processing_started = True
-            
-            elif processing_started and current_phase_index < 4:
-                if elapsed > (timeout * 0.8):  # 80% del tiempo
-                    current_phase_index = 4  # Guardado
-            
-            # 4. ACTUALIZAR PROGRESO (cada 3 segundos o cuando hay cambio)
+            # Actualizar progreso cada 3 segundos o cuando hay cambio
             if (time.time() - last_progress_update > 3 or 
                 articles_processed != last_articles_count):
                 update_progress()
                 last_progress_update = time.time()
                 last_articles_count = articles_processed
             
-            time.sleep(0.5)  # Pequeña pausa para no sobrecargar
+            time.sleep(0.1)
         
-        # FASE 3: FINALIZACIÓN
+        # Esperar a que el hilo de lectura termine
+        reader_thread.join(timeout=5)
         return_code = process.poll()
-        final_elapsed = int(time.time() - start_time)
         
         if return_code == 0:
-            # ✅ ÉXITO - Completar al 100%
             success_message = (f"✅ {command_name} completado! "
-                             f"{articles_processed} noticias procesadas en {final_elapsed}s")
+                             f"{articles_processed} noticias procesadas en {int(time.time() - start_time)}s")
             
             self.update_state(
                 state='PROGRESS',
@@ -406,12 +355,12 @@ def run_single_scrape(self, command_name):
                     'articles_processed': articles_processed,
                     'total_articles_found': total_articles_found,
                     'completed': True,
-                    'elapsed_time': final_elapsed,
+                    'elapsed_time': int(time.time() - start_time),
                     'success': True
                 }
             )
             
-            print(f"🎉 {command_name} EXITOSO: {articles_processed} noticias en {final_elapsed}s")
+            print(f"🎉 {command_name} EXITOSO: {articles_processed} noticias en {int(time.time() - start_time)}s")
             
             return {
                 "status": "success",
@@ -419,12 +368,10 @@ def run_single_scrape(self, command_name):
                 "command": command_name,
                 "articles_processed": articles_processed,
                 "total_articles_found": total_articles_found,
-                "elapsed_time": final_elapsed,
+                "elapsed_time": int(time.time() - start_time),
                 "completed": True
             }
-            
         else:
-            # ❌ ERROR en el comando
             error_msg = f"El comando falló con código: {return_code}"
             print(f"💥 {error_msg}")
             
@@ -444,7 +391,6 @@ def run_single_scrape(self, command_name):
             raise Exception(error_msg)
         
     except TimeoutError as exc:
-        # ⏰ TIMEOUT
         error_msg = f"Timeout después de {timeout}s: {exc}"
         print(f"⏰ {error_msg}")
         
@@ -463,7 +409,6 @@ def run_single_scrape(self, command_name):
         raise
         
     except Exception as exc:
-        # 💥 ERROR GENERAL
         error_msg = f"Error crítico: {exc}"
         print(f"💥 {error_msg}")
         

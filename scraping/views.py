@@ -10,8 +10,11 @@ from django.http import JsonResponse
 from django.core.management import call_command
 from .tasks import scrape_all_sections, run_single_scrape
 from celery.result import AsyncResult
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 
 # Función helper mejorada para manejar lógica común de listas de noticias
+@login_required
 def lista_noticias_helper(request, queryset_base, template_name, nav_type='comercio'):
     # Obtener filtros desde GET
     filtro_imagen = request.GET.get('con_imagen', '')
@@ -120,10 +123,12 @@ def lista_noticias_helper(request, queryset_base, template_name, nav_type='comer
     return render(request, template_name, context)
 
 # ===== VISTAS PARA EL COMERCIO =====
+@login_required
 def lista_noticias(request):
     queryset = Noticia.objects.filter(Q(origen="elcomercio") | Q(origen="desconocido"))
     return lista_noticias_helper(request, queryset, 'noticias/lista.html', nav_type='comercio')
 
+@login_required
 def politica(request):
     queryset = Noticia.objects.filter(
         Q(origen="elcomercio") | Q(origen="desconocido"), 
@@ -131,6 +136,7 @@ def politica(request):
     )
     return lista_noticias_helper(request, queryset, 'noticias/politica.html', nav_type='comercio')
 
+@login_required
 def economia(request):
     queryset = Noticia.objects.filter(
         Q(origen="elcomercio") | Q(origen="desconocido"), 
@@ -138,6 +144,7 @@ def economia(request):
     )
     return lista_noticias_helper(request, queryset, 'noticias/economia.html', nav_type='comercio')
 
+@login_required
 def mundo(request):
     queryset = Noticia.objects.filter(
         Q(origen="elcomercio") | Q(origen="desconocido"), 
@@ -145,6 +152,7 @@ def mundo(request):
     )
     return lista_noticias_helper(request, queryset, 'noticias/mundo.html', nav_type='comercio')
 
+@login_required
 def tecnologia(request):
     queryset = Noticia.objects.filter(
         Q(origen="elcomercio") | Q(origen="desconocido"), 
@@ -153,22 +161,27 @@ def tecnologia(request):
     return lista_noticias_helper(request, queryset, 'noticias/tecnologia.html', nav_type='comercio')
 
 # ===== VISTAS PARA PERU21 =====
+@login_required
 def peru21(request):
     queryset = Noticia.objects.filter(origen='peru21')
     return lista_noticias_helper(request, queryset, 'peru21/peru21.html', nav_type='peru21')
 
+@login_required
 def peru21d(request):
     queryset = Noticia.objects.filter(origen='peru21', enlace__icontains="/deportes/")
     return lista_noticias_helper(request, queryset, 'peru21/peru21d.html', nav_type='peru21')
 
+@login_required
 def peru21g(request):
     queryset = Noticia.objects.filter(origen='peru21', enlace__icontains="/gastronomia/")
     return lista_noticias_helper(request, queryset, 'peru21/peru21g.html', nav_type='peru21')
 
+@login_required
 def peru21i(request):
     queryset = Noticia.objects.filter(origen='peru21', enlace__icontains="/investigacion/")
     return lista_noticias_helper(request, queryset, 'peru21/peru21i.html', nav_type='peru21')
 
+@login_required
 def peru21l(request):
     queryset = Noticia.objects.filter(origen='peru21', enlace__icontains="/lima/")
     return lista_noticias_helper(request, queryset, 'peru21/peru21l.html', nav_type='peru21')
@@ -208,37 +221,62 @@ def ejecutar_scraping_generico(request, command_name=None):
     }, status=405)
 
 # ===== VISTAS DE SCRAPING ESPECÍFICAS =====
+@login_required
 def ejecutar_scraping_lista_noticias(request):
+    if request.user.profile.role not in ['premium', 'admin']:
+        raise PermissionDenied("Solo usuarios Premium pueden ejecutar scraping")
     return ejecutar_scraping_generico(request, "scrape_elcomercio")
 
+@login_required
 def ejecutar_scraping_politica(request):
     return ejecutar_scraping_generico(request, "scrape_elcomercio_pol")
 
+@login_required
 def ejecutar_scraping_economia(request):
     return ejecutar_scraping_generico(request, "scrape_economia")
 
+@login_required
 def ejecutar_scraping_mundo(request):
     return ejecutar_scraping_generico(request, "scrape_mundo")
 
+@login_required
 def ejecutar_scraping_tecnologia(request):
+    if request.user.profile.role not in ['premium', 'admin']:
+        raise PermissionDenied("Solo usuarios Premium pueden ejecutar scraping")
     return ejecutar_scraping_generico(request, "scrape_tecnologia")
 
+@login_required
 def ejecutar_scraping_peru21(request):
+    if request.user.profile.role not in ['premium', 'admin']:
+        raise PermissionDenied("Solo usuarios Premium pueden ejecutar scraping")
     return ejecutar_scraping_generico(request, "scrape_peru21")
 
+@login_required
 def ejecutar_scraping_peru21_deportes(request):
+    if request.user.profile.role not in ['premium', 'admin']:
+        raise PermissionDenied("Solo usuarios Premium pueden ejecutar scraping")
     return ejecutar_scraping_generico(request, "scrape_peru21D")
 
+@login_required
 def ejecutar_scraping_peru21_gastronomia(request):
+    if request.user.profile.role not in ['premium', 'admin']:
+        raise PermissionDenied("Solo usuarios Premium pueden ejecutar scraping")
     return ejecutar_scraping_generico(request, "scrape_peru21G")
 
+@login_required
 def ejecutar_scraping_peru21_investigacion(request):
+    if request.user.profile.role not in ['premium', 'admin']:
+        raise PermissionDenied("Solo usuarios Premium pueden ejecutar scraping")
     return ejecutar_scraping_generico(request, "scrape_peru21I")
 
+@login_required
 def ejecutar_scraping_peru21_lima(request):
+    if request.user.profile.role not in ['premium', 'admin']:
+        raise PermissionDenied("Solo usuarios Premium pueden ejecutar scraping")
     return ejecutar_scraping_generico(request, "scrape_peru21L")
 
 # ===== VISTA API PARA ESTADÍSTICAS (OPCIONAL) =====
+@login_required
 def estadisticas_noticias(request):
     """Vista opcional para obtener estadísticas de noticias vía API"""
     origen = request.GET.get('origen', 'all')
@@ -268,6 +306,7 @@ def estadisticas_noticias(request):
     })
 
 logger = logging.getLogger(__name__)
+@login_required
 def ver_estado_tarea(request, task_id):
     """Ver el estado de una tarea Celery con manejo robusto de errores."""
     try:

@@ -9,6 +9,13 @@ from django.utils import timezone
 class Command(BaseCommand):
     help = 'Scrapea noticias de El Comercio (versión arreglada para imágenes específicas)'
     
+    def safe_write(self, message, style=None, ending='\n'):
+        """Escribe a stdout con flush inmediato para evitar bloqueos"""
+        if style:
+            message = style(message)
+        self.stdout.write(message, ending=ending)
+        self.stdout.flush()
+    
     def obtener_imagen_elcomercio(self, noticia_element):
         """Obtiene imágenes específicamente de El Comercio basado en el HTML proporcionado"""
         try:
@@ -55,7 +62,7 @@ class Command(BaseCommand):
                             if 'elcomercio.pe' in src and resolucion > mejor_resolucion:
                                 mejor_resolucion = resolucion
                                 mejor_imagen = src
-                                self.stdout.write(f"  🖼️ Imagen encontrada: {resolucion}p - {src[:80]}...")
+                                self.safe_write(f"  🖼️ Imagen encontrada: {resolucion}p - {src[:80]}...")
                                 
                 except Exception as e:
                     continue
@@ -67,7 +74,7 @@ class Command(BaseCommand):
             return mejor_imagen
             
         except Exception as e:
-            self.stdout.write(f"⚠️ Error obteniendo imagen: {e}")
+            self.safe_write(f"⚠️ Error obteniendo imagen: {e}")
             return None
     
     def es_imagen_valida(self, url):
@@ -145,7 +152,7 @@ class Command(BaseCommand):
                     
                     # Mejorar calidad modificando parámetros
                     src_mejorada = self.mejorar_url_imagen(src)
-                    self.stdout.write(f"  📈 Mejorando imagen: {src_mejorada[:80]}...")
+                    self.safe_write(f"  📈 Mejorando imagen: {src_mejorada[:80]}...")
                     return src_mejorada
                     
         except Exception:
@@ -217,24 +224,24 @@ class Command(BaseCommand):
             page = context.new_page()
             
             try:
-                self.stdout.write("🌐 Navegando a El Comercio...")
+                self.safe_write("🌐 Navegando a El Comercio...")
                 page.goto("https://elcomercio.pe", timeout=60000, wait_until="domcontentloaded")
                 
                 # Esperar a que carguen las noticias
                 page.wait_for_selector(".fs-wi", timeout=15000)
                 
                 # Scroll para cargar más imágenes lazy
-                self.stdout.write("📜 Haciendo scroll para cargar imágenes...")
+                self.safe_write("📜 Haciendo scroll para cargar imágenes...")
                 for _ in range(3):
                     page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
                     page.wait_for_timeout(2000)
                 
                 noticias = page.locator(".fs-wi").all()
-                self.stdout.write(f"📰 Se encontraron {len(noticias)} noticias.")
+                self.safe_write(f"📰 Se encontraron {len(noticias)} noticias.")
                 
                 for i, noticia in enumerate(noticias):
                     try:
-                        self.stdout.write(f"📄 Procesando noticia {i+1}/{len(noticias)}")
+                        self.safe_write(f"📄 Procesando noticia {i+1}/{len(noticias)}")
                         
                         # Título
                         try:
@@ -277,22 +284,22 @@ class Command(BaseCommand):
                         # Debug info
                         if imagen:
                             resolucion = self.obtener_resolucion_url(imagen)
-                            self.stdout.write(f"  ✅ Imagen: {resolucion}p - {titulo[:30]}...")
+                            self.safe_write(f"  ✅ Imagen: {resolucion}p - {titulo[:30]}...")
                         else:
-                            self.stdout.write(f"  ⚠️ Sin imagen: {titulo[:30]}...")
+                            self.safe_write(f"  ⚠️ Sin imagen: {titulo[:30]}...")
                             
                     except Exception as e:
-                        self.stdout.write(f"❌ Error procesando noticia {i+1}: {e}")
+                        self.safe_write(f"❌ Error procesando noticia {i+1}: {e}")
                         continue
                 
             except Exception as e:
-                self.stdout.write(self.style.ERROR(f"❌ Error durante el scraping: {e}"))
+                self.safe_write(self.style.ERROR(f"❌ Error durante el scraping: {e}"))
             finally:
                 browser.close()
         
         # Guardar en base de datos con manejo de errores
         if noticias_para_guardar:
-            self.stdout.write(f"💾 Guardando {len(noticias_para_guardar)} noticias...")
+            self.safe_write(f"💾 Guardando {len(noticias_para_guardar)} noticias...")
             
             noticias_nuevas = 0
             noticias_actualizadas = 0
@@ -318,7 +325,7 @@ class Command(BaseCommand):
                         
                         if created:
                             noticias_nuevas += 1
-                            self.stdout.write(f"  ✅ Nueva: {titulo[:40]}...")
+                            self.safe_write(f"  ✅ Nueva: {titulo[:40]}...")
                         else:
                             # Actualizar imagen si la nueva es mejor
                             if data['imagen'] and (not noticia.imagen or 
@@ -326,18 +333,18 @@ class Command(BaseCommand):
                                 noticia.imagen = data['imagen']
                                 noticia.save()
                                 noticias_actualizadas += 1
-                                self.stdout.write(f"  🔄 Actualizada: {titulo[:40]}...")
+                                self.safe_write(f"  🔄 Actualizada: {titulo[:40]}...")
                             else:
-                                self.stdout.write(f"  ⚪ Existente: {titulo[:40]}...")
+                                self.safe_write(f"  ⚪ Existente: {titulo[:40]}...")
                                 
                     except Exception as e:
                         errores += 1
-                        self.stdout.write(f"  ❌ Error guardando: {e}")
+                        self.safe_write(f"  ❌ Error guardando: {e}")
                         continue
                 
-                self.stdout.write(f"📊 Resumen:")
-                self.stdout.write(f"  ✅ Noticias nuevas: {noticias_nuevas}")
-                self.stdout.write(f"  🔄 Noticias actualizadas: {noticias_actualizadas}")
-                self.stdout.write(f"  ❌ Errores: {errores}")
+                self.safe_write(f"📊 Resumen:")
+                self.safe_write(f"  ✅ Noticias nuevas: {noticias_nuevas}")
+                self.safe_write(f"  🔄 Noticias actualizadas: {noticias_actualizadas}")
+                self.safe_write(f"  ❌ Errores: {errores}")
         
-        self.stdout.write(self.style.SUCCESS("✅ Scraping finalizado!"))
+        self.safe_write(self.style.SUCCESS("✅ Scraping finalizado!"))

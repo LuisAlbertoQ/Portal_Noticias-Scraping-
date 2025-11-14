@@ -1,0 +1,209 @@
+/* ===== ESTILOS ESPECÍFICOS PARA BIENVENIDA ===== */
+
+/* Hero Section */
+.hero {
+    background: var(--primary-gradient);
+    color: var(--text-light);
+    padding: 80px 0;
+    text-align: center;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-medium);
+    margin-bottom: 60px;
+    position: sticky;
+    overflow: hidden;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="%23ffffff" opacity="0.1"><polygon points="1000,100 1000,0 0,100"/></svg>');
+    background-size: cover;
+}
+
+.hero h1 {
+    font-size: 48px;
+    margin-bottom: 16px;
+    position: relative;
+}
+
+.hero p {
+    font-size: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+    position: relative;
+}
+
+/* Welcome Cards */
+.welcome-card {
+    max-width: 500px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.welcome-card h2 {
+    margin-bottom: 24px;
+    color: var(--text-color);
+}
+
+.welcome-card p {
+    margin-bottom: 32px;
+    color: var(--text-muted);
+}
+
+.welcome-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+}
+
+.stats-item {
+    text-align: center;
+}
+
+.stats-number {
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.stats-number.success {
+    color: var(--success-color);
+}
+
+.stats-label {
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+/* Features Section */
+.features-section {
+    margin-top: 60px;
+}
+
+.features-section h2 {
+    text-align: center;
+    margin-bottom: 40px;
+    color: var(--text-color);
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.feature-card {
+    text-align: center;
+    padding: 30px 20px;
+}
+
+.feature-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+}
+
+.feature-icon.primary {
+    background: var(--primary-10);
+}
+
+.feature-icon.secondary {
+    background: var(--secondary-10);
+}
+
+.feature-icon.accent {
+    background: var(--accent-10);
+}
+
+.feature-icon.success {
+    background: rgba(46, 204, 113, 0.1);
+}
+
+.feature-icon span {
+    font-size: 24px;
+}
+
+.feature-icon.primary span {
+    color: var(--primary-color);
+}
+
+.feature-icon.secondary span {
+    color: var(--secondary-color);
+}
+
+.feature-icon.accent span {
+    color: var(--accent-color);
+}
+
+.feature-icon.success span {
+    color: var(--success-color);
+}
+
+.feature-card h3 {
+    margin-bottom: 12px;
+    color: var(--text-color);
+}
+
+.feature-card p {
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hero h1 {
+        font-size: 36px;
+    }
+    
+    .hero p {
+        font-size: 18px;
+    }
+    
+    .welcome-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .feature-card {
+        padding: 20px 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero {
+        padding: 60px 0;
+        margin-bottom: 40px;
+    }
+    
+    .hero h1 {
+        font-size: 28px;
+    }
+    
+    .hero p {
+        font-size: 16px;
+    }
+}

@@ -7,6 +7,8 @@
     --success-color: #27ae60;
     
     /* Colores de texto */
+    --text-black: #000000;
+    --text-white: #ffffff;
     --text-color: #2c3e50;
     --text-muted: #7f8c8d;
     

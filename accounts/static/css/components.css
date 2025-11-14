@@ -1,0 +1,142 @@
+/* ===== COMPONENTES REUTILIZABLES ===== */
+
+/* Botones */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    font-weight: 500;
+    transition: var(--transition);
+    font-size: 14px;
+    gap: 8px;
+}
+
+.btn-primary {
+    background: var(--primary-gradient);
+    color: var(--text-light);
+}
+
+.btn-primary:hover {
+    background: var(--dark-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+.btn-secondary {
+    background: var(--bg-white);
+    color: var(--text-color);
+    border: 1px solid #dadce0;
+}
+
+.btn-secondary:hover {
+    background: var(--bg-light);
+    box-shadow: var(--shadow-light);
+}
+
+.btn-accent {
+    background-color: var(--accent-color);
+    color: var(--text-light);
+}
+
+.btn-accent:hover {
+    background-color: #d33426;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+/* Tarjetas */
+.card {
+    background: var(--bg-white);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-light);
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #f1f3f4;
+    background-color: var(--bg-light);
+}
+
+.card-body {
+    padding: 20px;
+}
+
+/* Alertas */
+.alert {
+    padding: 12px 16px;
+    border-radius: var(--border-radius);
+    margin-bottom: 16px;
+    font-size: 14px;
+}
+
+.alert-info {
+    background-color: var(--primary-10);
+    color: var(--dark-primary);
+    border-left: 4px solid var(--primary-color);
+}
+
+.alert-success {
+    background-color: rgba(52, 168, 83, 0.1);
+    color: #1e8e3e;
+    border-left: 4px solid var(--success-color);
+}
+
+.alert-error {
+    background-color: var(--accent-10);
+    color: #c5221f;
+    border-left: 4px solid var(--accent-color);
+}
+
+/* Formularios */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #dadce0;
+    border-radius: var(--border-radius);
+    font-size: 14px;
+    transition: var(--transition);
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px var(--primary-20);
+}
+
+/* Badges */
+.badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.badge-primary {
+    background-color: var(--primary-10);
+    color: var(--primary-color);
+}
+
+.badge-accent {
+    background-color: var(--accent-10);
+    color: var(--accent-color);
+}
+
+.badge-secondary {
+    background-color: #f1f3f4;
+    color: var(--text-muted);
+}

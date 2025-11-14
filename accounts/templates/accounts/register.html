@@ -1,0 +1,184 @@
+{% extends 'base_auth.html' %}
+{% load static %}
+
+{% block content %}
+<div class="fade-in">
+    <section class="form-section">
+        <div class="form-container">
+            <!-- Header del Formulario -->
+            <div class="form-header">
+                <h2>Crear Cuenta</h2>
+                <p>Únete a News Scraper y descubre las últimas noticias</p>
+            </div>
+
+            <!-- Mostrar errores generales del formulario -->
+            {% if form.errors %}
+            <div class="form-errors">
+                <ul>
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <!-- Formulario -->
+            <form method="post" class="auth-form">
+                {% csrf_token %}
+                
+                <!-- Campo Username -->
+                <div class="form-group">
+                    <label for="{{ form.username.id_for_label }}" class="form-label">
+                        Nombre de Usuario
+                    </label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        <span class="field-errors">{{ form.username.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Campo Email -->
+                <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}" class="form-label">
+                        Correo Electrónico
+                    </label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <span class="field-errors">{{ form.email.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Campo Contraseña -->
+                <div class="form-group">
+                    <label for="{{ form.password1.id_for_label }}" class="form-label">
+                        Contraseña
+                    </label>
+                    {{ form.password1 }}
+                    {% if form.password1.errors %}
+                        <span class="field-errors">{{ form.password1.errors.0 }}</span>
+                    {% endif %}
+                    {% if form.password1.help_text %}
+                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                            {{ form.password1.help_text }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Campo Confirmar Contraseña -->
+                <div class="form-group">
+                    <label for="{{ form.password2.id_for_label }}" class="form-label">
+                        Confirmar Contraseña
+                    </label>
+                    {{ form.password2 }}
+                    {% if form.password2.errors %}
+                        <span class="field-errors">{{ form.password2.errors.0 }}</span>
+                    {% endif %}
+                    {% if form.password2.help_text %}
+                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                            {{ form.password2.help_text }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Términos y Condiciones -->
+                <div class="form-group" style="display: flex; align-items: flex-start; gap: 8px;">
+                    {{ form.agree_terms }}
+                    <label for="{{ form.agree_terms.id_for_label }}" class="form-label" style="margin: 0; font-size: 14px; line-height: 1.4;">
+                        Acepto los <a href="#" style="color: var(--primary-color);">términos y condiciones</a> y la <a href="#" style="color: var(--primary-color);">política de privacidad</a>
+                    </label>
+                </div>
+                {% if form.agree_terms.errors %}
+                    <span class="field-errors">{{ form.agree_terms.errors.0 }}</span>
+                {% endif %}
+
+                <!-- Botón de Envío -->
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">
+                        <span>Crear Cuenta</span>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Enlace de Login -->
+            <div class="form-footer">
+                <p>¿Ya tienes cuenta? <a href="{% url 'login' %}">Inicia sesión aquí</a></p>
+            </div>
+
+            <!-- Beneficios de registrarse -->
+            <div class="login-options">
+                <div class="login-divider">
+                    <span>Beneficios</span>
+                </div>
+                <div style="text-align: center;">
+                    <div style="display: inline-flex; flex-direction: column; gap: 8px; text-align: left;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="color: var(--success-color);">✓</span>
+                            <span style="font-size: 14px; color: var(--text-muted);">Acceso a todas las noticias</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="color: var(--success-color);">✓</span>
+                            <span style="font-size: 14px; color: var(--text-muted);">Búsqueda avanzada</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Script para mejorar los campos del formulario -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Agregar clases a los campos del formulario
+    const inputs = document.querySelectorAll('input[type="text"], input[type="password"], input[type="email"]');
+    inputs.forEach(input => {
+        input.classList.add('form-control');
+        
+        // Agregar validación visual
+        input.addEventListener('blur', function() {
+            if (this.value.trim() === '') {
+                this.classList.add('error');
+            } else {
+                this.classList.remove('error');
+            }
+        });
+    });
+
+    // Agregar placeholders si no los tienen
+    const fields = [
+        { id: 'id_username', placeholder: 'Elige un nombre de usuario' },
+        { id: 'id_email', placeholder: 'tu@email.com' },
+        { id: 'id_password1', placeholder: 'Crea una contraseña segura' },
+        { id: 'id_password2', placeholder: 'Repite tu contraseña' }
+    ];
+
+    fields.forEach(field => {
+        const element = document.querySelector('#' + field.id);
+        if (element && !element.getAttribute('placeholder')) {
+            element.setAttribute('placeholder', field.placeholder);
+        }
+    });
+
+    // Validación de contraseñas en tiempo real
+    const password1 = document.querySelector('#id_password1');
+    const password2 = document.querySelector('#id_password2');
+
+    function validatePasswords() {
+        if (password1 && password2 && password1.value && password2.value) {
+            if (password1.value !== password2.value) {
+                password2.classList.add('error');
+            } else {
+                password2.classList.remove('error');
+            }
+        }
+    }
+
+    if (password1 && password2) {
+        password1.addEventListener('input', validatePasswords);
+        password2.addEventListener('input', validatePasswords);
+    }
+});
+</script>
+{% endblock %}

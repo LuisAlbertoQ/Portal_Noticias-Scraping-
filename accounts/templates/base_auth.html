@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Scraper</title>
+        <!-- Cargar static files -->
+    {% load static %}
+    
+    <!-- iconos fontawesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- CSS -->
+    <link rel="stylesheet" href="{% static 'css/mainaccount.css' %}">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="navbar">
+            <a href="{% url 'bienvenida' %}" class="navbar-brand">NewsMiner</a>
+            
+            <div class="navbar-nav">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'lista_noticias' %}" class="nav-link">Noticias</a>
+                    <a href="{% url 'profile' %}" class="nav-link">Mi Perfil</a>
+                    <a href="{% url 'logout' %}" class="nav-link">Cerrar Sesión</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="nav-link">Iniciar Sesión</a>
+                    <a href="{% url 'register' %}" class="nav-link">Registrarse</a>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+
+    <!-- Contenido principal -->
+    <main class="main-content">
+        <div class="container">
+            {% if request.GET.next %}
+                <div class="alert alert-info">
+                    Por favor inicia sesión para acceder a esa página.
+                </div>
+            {% endif %}
+            
+            {% block content %}
+            {% endblock %}
+            
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} fade-in">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>NewsMiner</h3>
+                <p>Explora las últimas noticias de El Comercio y Perú21</p>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Enlaces</h3>
+                <div class="footer-links">
+                    <a href="{% url 'bienvenida' %}" class="footer-link">Inicio</a>
+                    <a href="{% url 'lista_noticias' %}" class="footer-link">Noticias</a>
+                </div>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Cuenta</h3>
+                <div class="footer-links">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'profile' %}" class="footer-link">Mi Perfil</a>
+                        <a href="{% url 'logout' %}" class="footer-link">Cerrar Sesión</a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="footer-link">Iniciar Sesión</a>
+                        <a href="{% url 'register' %}" class="footer-link">Registrarse</a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Fuentes</h3>
+                <div class="footer-links">
+                    <a href="https://elcomercio.pe/" class="footer-link">El Comercio</a>
+                    <a href="https://peru21.pe/" class="footer-link">Perú21</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2025 NewsMiner. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -7,17 +7,17 @@ import { CONFIG } from '../core/config.js';
 class ScrapingManager {
     constructor() {
         this.buttons = [
-            { id: 'scraping-btn', endpoint: '/scraping/lista', category: 'general' },
-            { id: 'scraping-tecnologia-btn', endpoint: '/scraping/tecnologia', category: 'tecnología' },
-            { id: 'scraping-mundo-btn', endpoint: '/scraping/mundo', category: 'mundo' },
-            { id: 'scraping-economia-btn', endpoint: '/scraping/economia', category: 'economía' },
-            { id: 'scraping-politica-btn', endpoint: '/scraping/politica', category: 'política' },
-            { id: 'scraping-lista-btn', endpoint: '/scraping/lista', category: 'lista' },
-            { id: 'scraping-peru21-btn', endpoint: '/scraping/peru21', category: 'perugeneral' },
-            { id: 'scraping-peru21-deportes-btn', endpoint: '/scraping/peru21/deportes', category: 'perudeportes' },
-            { id: 'scraping-peru21-gastronomia-btn', endpoint: '/scraping/peru21/gastronomia', category: 'perugastronomia' },
-            { id: 'scraping-peru21-investigacion-btn', endpoint: '/scraping/peru21/investigacion', category: 'peruinvestigacion' },
-            { id: 'scraping-peru21-lima-btn', endpoint: '/scraping/peru21/lima', category: 'perulima' }
+            { id: 'scraping-btn', endpoint: '/noticias/scraping/lista', category: 'general' },
+            { id: 'scraping-tecnologia-btn', endpoint: '/noticias/scraping/tecnologia', category: 'tecnología' },
+            { id: 'scraping-mundo-btn', endpoint: '/noticias/scraping/mundo', category: 'mundo' },
+            { id: 'scraping-economia-btn', endpoint: '/noticias/scraping/economia', category: 'economía' },
+            { id: 'scraping-politica-btn', endpoint: '/noticias/scraping/politica', category: 'política' },
+            { id: 'scraping-lista-btn', endpoint: '/noticias/scraping/lista', category: 'lista' },
+            { id: 'scraping-peru21-btn', endpoint: '/noticias/scraping/peru21', category: 'perugeneral' },
+            { id: 'scraping-peru21-deportes-btn', endpoint: '/noticias/scraping/peru21/deportes', category: 'perudeportes' },
+            { id: 'scraping-peru21-gastronomia-btn', endpoint: '/noticias/scraping/peru21/gastronomia', category: 'perugastronomia' },
+            { id: 'scraping-peru21-investigacion-btn', endpoint: '/noticias/scraping/peru21/investigacion', category: 'peruinvestigacion' },
+            { id: 'scraping-peru21-lima-btn', endpoint: '/noticias/scraping/peru21/lima', category: 'perulima' }
         ];
         
         this.activeRequests = new Map();
@@ -135,7 +135,7 @@ class ScrapingManager {
 
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
             try {
-                const statusResponse = await fetch(`/scraping/task-status/${taskId}/`);
+                const statusResponse = await fetch(`/noticias/scraping/task-status/${taskId}/`);
                 
                 if (!statusResponse.ok) {
                     throw new Error(`Error HTTP ${statusResponse.status}`);
@@ -223,7 +223,7 @@ class ScrapingManager {
         
         // ✅ VERIFICACIÓN FINAL ANTES DE TIMEOUT (de tu versión - IMPORTANTE)
         try {
-            const finalCheck = await fetch(`/scraping/task-status/${taskId}/`);
+            const finalCheck = await fetch(`/noticias/scraping/task-status/${taskId}/`);
             const finalData = await finalCheck.json();
             
             if (finalData.status === 'SUCCESS' || finalData.completed) {

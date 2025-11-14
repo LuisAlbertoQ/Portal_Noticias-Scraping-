@@ -13,6 +13,13 @@ BASE_URL = "https://peru21.pe/deportes"
 class Command(BaseCommand):
     help = 'Scrapea noticias de la sección Deportes de Perú21'
 
+    def safe_write(self, message, style=None, ending='\n'):
+        """Escribe a stdout con flush inmediato para evitar bloqueos"""
+        if style:
+            message = style(message)
+        self.stdout.write(message, ending=ending)
+        self.stdout.flush()
+
     def obtener_imagen_peru21(self, noticia_element):
         try:
             img = noticia_element.locator("img.img-fluid").first
@@ -49,22 +56,22 @@ class Command(BaseCommand):
             page = context.new_page()
 
             try:
-                self.stdout.write("🌐 Navegando a Perú21 - Deportes...")
+                self.safe_write("🌐 Navegando a Perú21 - Deportes...")
                 page.goto(BASE_URL, timeout=60000, wait_until="domcontentloaded")
 
                 page.wait_for_selector("article.node--type-article", timeout=15000)
 
-                self.stdout.write("📜 Haciendo scroll para cargar más noticias...")
+                self.safe_write("📜 Haciendo scroll para cargar más noticias...")
                 for _ in range(3):
                     page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
                     page.wait_for_timeout(2000)
 
                 noticias = page.locator("article.node--type-article").all()
-                self.stdout.write(f"📰 Se encontraron {len(noticias)} noticias.")
+                self.safe_write(f"📰 Se encontraron {len(noticias)} noticias.")
 
                 for i, noticia in enumerate(noticias):
                     try:
-                        self.stdout.write(f"📄 Procesando noticia {i+1}/{len(noticias)}")
+                        self.safe_write(f"📄 Procesando noticia {i+1}/{len(noticias)}")
 
                         # título
                         try:
@@ -113,17 +120,17 @@ class Command(BaseCommand):
                         noticias_para_guardar.append(noticia_data)
 
                     except Exception as e:
-                        self.stdout.write(f"❌ Error procesando noticia {i+1}: {e}")
+                        self.safe_write(f"❌ Error procesando noticia {i+1}: {e}")
                         continue
 
             except Exception as e:
-                self.stdout.write(self.style.ERROR(f"❌ Error durante el scraping: {e}"))
+                self.safe_write(self.style.ERROR(f"❌ Error durante el scraping: {e}"))
             finally:
                 browser.close()
 
         # Guardado en DB
         if noticias_para_guardar:
-            self.stdout.write(f"💾 Guardando {len(noticias_para_guardar)} noticias...")
+            self.safe_write(f"💾 Guardando {len(noticias_para_guardar)} noticias...")
             noticias_nuevas, noticias_actualizadas, errores = 0, 0, 0
 
             with transaction.atomic():
@@ -152,12 +159,12 @@ class Command(BaseCommand):
                                 noticias_actualizadas += 1
                     except Exception as e:
                         errores += 1
-                        self.stdout.write(f"  ❌ Error guardando: {e}")
+                        self.safe_write(f"  ❌ Error guardando: {e}")
                         continue
 
-            self.stdout.write(f"📊 Resumen:")
-            self.stdout.write(f"  ✅ Noticias nuevas: {noticias_nuevas}")
-            self.stdout.write(f"  🔄 Noticias actualizadas: {noticias_actualizadas}")
-            self.stdout.write(f"  ❌ Errores: {errores}")
+            self.safe_write(f"📊 Resumen:")
+            self.safe_write(f"  ✅ Noticias nuevas: {noticias_nuevas}")
+            self.safe_write(f"  🔄 Noticias actualizadas: {noticias_actualizadas}")
+            self.safe_write(f"  ❌ Errores: {errores}")
 
-        self.stdout.write(self.style.SUCCESS("✅ Scraping de Deportes Perú21 finalizado!"))
+        self.safe_write(self.style.SUCCESS("✅ Scraping de Deportes Perú21 finalizado!"))
