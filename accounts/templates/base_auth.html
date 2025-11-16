@@ -20,6 +20,7 @@
             
             <div class="navbar-nav">
                 {% if user.is_authenticated %}
+                    <a href="{% url 'bienvenida' %}" class="nav-link">Inicio</a>
                     <a href="{% url 'lista_noticias' %}" class="nav-link">Noticias</a>
                     <a href="{% url 'profile' %}" class="nav-link">Mi Perfil</a>
                     <a href="{% url 'logout' %}" class="nav-link">Cerrar Sesión</a>
