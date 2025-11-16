@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.db.models import Q
 from django.utils import timezone
 from datetime import timedelta, datetime
-from .models import Noticia
+from .models import Noticia, NoticiasVistas
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import JsonResponse
 from django.core.management import call_command
@@ -410,4 +410,32 @@ def ver_estado_tarea(request, task_id):
             'status': 'ERROR',
             'error': str(e),
             'completed': False
+        }, status=500)
+
+@login_required
+def registrar_vista_noticia(request, noticia_id):
+    """Registra cuando un usuario ve una noticia"""
+    try:
+        noticia = Noticia.objects.get(id=noticia_id)
+        
+        # Crear o obtener el registro de noticia vista
+        NoticiasVistas.objects.get_or_create(
+            usuario=request.user,
+            noticia=noticia
+        )
+        
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Vista registrada correctamente'
+        })
+        
+    except Noticia.DoesNotExist:
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Noticia no encontrada'
+        }, status=404)
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
         }, status=500)

@@ -25,4 +25,6 @@ urlpatterns = [
     path('scraping/peru21/lima', views.ejecutar_scraping_peru21_lima, name='scraping_peru21_lima'),
     #scraping status
     path('scraping/task-status/<str:task_id>/', views.ver_estado_tarea, name='task_status'),
+    #vistanoticias
+    path('registrar-vista/<int:noticia_id>/', views.registrar_vista_noticia, name='registrar_vista_noticia'),
 ]

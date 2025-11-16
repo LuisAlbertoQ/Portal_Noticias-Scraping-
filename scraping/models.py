@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class Noticia(models.Model):
     titulo = models.CharField(max_length=255)
@@ -14,3 +15,15 @@ class Noticia(models.Model):
         
     def __str__(self):
         return f"[{self.origen}] {self.titulo}"
+
+class NoticiasVistas(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    noticia = models.ForeignKey(Noticia, on_delete=models.CASCADE)
+    fecha_vista = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ('usuario', 'noticia')
+        ordering = ['-fecha_vista']
+    
+    def __str__(self):
+        return f"{self.usuario.username} - {self.noticia.titulo}"

@@ -213,7 +213,8 @@
 
                         <div class="news-actions">
                             {% if noticia.enlace %}
-                                <a href="{{ noticia.enlace }}" target="_blank" class="read-more">
+                                <a href="{{ noticia.enlace }}"target="_blank" 
+                                class="read-more" onclick="registrarVista({{ noticia.id }})">
                                     Leer más <i class="fas fa-external-link-alt"></i>
                                 </a>
                             {% else %}
@@ -283,6 +284,45 @@
 
     <!-- JS propio -->
     <script type="module" src="{% static 'js/app.js' %}"></script>
+    <script>
+    function registrarVista(noticiaId) {
+        // Registrar la vista antes de redirigir
+        fetch(`/noticias/registrar-vista/${noticiaId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Actualizar el contador en tiempo real si es necesario
+            if (data.status === 'success') {
+                console.log('Vista registrada');
+                // Opcional: actualizar el contador en la interfaz
+                actualizarContadorVistas();
+            }
+        })
+        .catch(error => {
+            console.error('Error al registrar vista:', error);
+        });
+        
+        // La redirección ocurre normalmente por el href
+    }
+
+    function actualizarContadorVistas() {
+        // Opcional: hacer una petición para actualizar el contador
+        // Esto sería útil si quieres mostrar el contador actualizado sin recargar
+        fetch('/accounts/obtener-contador-vistas/')
+            .then(response => response.json())
+            .then(data => {
+                const contadorElement = document.querySelector('.stat-number');
+                if (contadorElement) {
+                    contadorElement.textContent = data.count.toLocaleString();
+                }
+            });
+    }
+    </script>
     {% block extra_js %}{% endblock %}
     {% include 'includes/icon_user.html' %}
 </body>
