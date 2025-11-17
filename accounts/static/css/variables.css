@@ -1,7 +1,7 @@
 /* ===== VARIABLES CSS - COLORES Y TOKENS DE DISEÑO ===== */
 :root {
     /* Colores principales - basados en la imagen (celeste y verde) */
-    --primary-color: #1abc9c;
+    --primary-color: #3498db;
     --secondary-color: #3498db;
     --accent-color: #e74c3c;
     --success-color: #2ecc71;

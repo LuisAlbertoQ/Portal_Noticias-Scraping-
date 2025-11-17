@@ -1,42 +1,58 @@
-import { showNotification } from '../components/notifications.js';
-
 // ===== FUNCIONES GLOBALES MEJORADAS =====
-function compartirNoticia(titulo, enlace) {
+async function compartirNoticia(titulo, enlace, noticiaId = null) {
     const url = enlace || window.location.href;
     const texto = `📰 ${titulo}`;
+    let plataforma = 'general';
     
     if (navigator.share) {
-        navigator.share({
-            title: titulo,
-            text: texto,
-            url: url
-        }).catch(err => {
-            if (err.name !== 'AbortError') {
-                fallbackShare(texto, url);
+        try {
+            await navigator.share({
+                title: titulo,
+                text: texto,
+                url: url
+            });
+            plataforma = 'navigator_share';
+            
+            // Registrar el compartir exitoso
+            if (noticiaId) {
+                await registrarCompartirActividad(noticiaId, plataforma);
             }
-        });
+            
+        } catch (err) {
+            if (err.name !== 'AbortError') {
+                await fallbackShare(texto, url, noticiaId);
+            }
+        }
     } else {
-        fallbackShare(texto, url);
+        await fallbackShare(texto, url, noticiaId);
     }
 }
 
-function fallbackShare(texto, url) {
+async function fallbackShare(texto, url, noticiaId = null) {
     const shareText = `${texto}\n${url}`;
+    let plataforma = 'clipboard';
     
     if (navigator.clipboard && !isMobileDevice()) {
-        navigator.clipboard.writeText(shareText)
-            .then(() => {
-                showNotification('¡Enlace copiado al portapapeles!', 'success');
-            })
-            .catch(() => {
-                legacyCopy(shareText);
-            });
+        try {
+            await navigator.clipboard.writeText(shareText);
+            showNotification('¡Enlace copiado al portapapeles!', 'success');
+            
+            // Registrar compartir por clipboard
+            if (noticiaId) {
+                await registrarCompartirActividad(noticiaId, plataforma);
+            }
+            
+        } catch (err) {
+            plataforma = 'legacy_copy';
+            await legacyCopy(shareText, noticiaId, plataforma);
+        }
     } else {
-        legacyCopy(shareText);
+        plataforma = 'legacy_copy';
+        await legacyCopy(shareText, noticiaId, plataforma);
     }
 }
 
-function legacyCopy(text) {
+async function legacyCopy(text, noticiaId = null, plataforma = 'legacy_copy') {
     const textArea = document.createElement('textarea');
     textArea.value = text;
     textArea.style.cssText = `
@@ -55,6 +71,11 @@ function legacyCopy(text) {
         
         if (successful) {
             showNotification('¡Enlace copiado al portapapeles!', 'success');
+            
+            // Registrar compartir exitoso
+            if (noticiaId) {
+                await registrarCompartirActividad(noticiaId, plataforma);
+            }
         } else {
             showNotification('No se pudo copiar el enlace', 'error');
         }
@@ -62,6 +83,46 @@ function legacyCopy(text) {
         document.body.removeChild(textArea);
         showNotification('Error al copiar el enlace', 'error');
     }
+}
+
+// Nueva función para registrar la actividad de compartir
+async function registrarCompartirActividad(noticiaId, plataforma) {
+    try {
+        const formData = new FormData();
+        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+        formData.append('plataforma', plataforma);
+        
+        const response = await fetch(`/noticias/registrar-compartir/${noticiaId}/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            console.log('Compartir registrado correctamente:', data.plataforma);
+        } else {
+            console.error('Error al registrar compartir:', data.message);
+        }
+    } catch (error) {
+        console.error('Error de red al registrar compartir:', error);
+    }
+}
+
+// Función para detectar la plataforma de compartir (opcional)
+function detectarPlataformaCompartir() {
+    const userAgent = navigator.userAgent.toLowerCase();
+    
+    if (userAgent.includes('whatsapp')) return 'whatsapp';
+    if (userAgent.includes('facebook')) return 'facebook';
+    if (userAgent.includes('twitter')) return 'twitter';
+    if (userAgent.includes('linkedin')) return 'linkedin';
+    if (userAgent.includes('telegram')) return 'telegram';
+    
+    return 'web';
 }
 
 function isMobileDevice() {
@@ -132,6 +193,8 @@ export {
     compartirNoticia,
     fallbackShare,
     legacyCopy,
+    registrarCompartirActividad,
+    detectarPlataformaCompartir,
     isMobileDevice,
     truncateText,
     formatDate,

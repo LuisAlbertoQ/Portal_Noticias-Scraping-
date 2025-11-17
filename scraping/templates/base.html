@@ -7,8 +7,8 @@
     <title>{% block title %}Noticias El Comercio - Portal de Noticias{% endblock %}</title>
     
     <!-- CSS externos -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <script src="https://kit.fontawesome.com/de7c7ab7a7.js" crossorigin="anonymous"></script>
+        
     <!-- CSS propio -->
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
     
@@ -224,8 +224,9 @@
                             {% endif %}
 
                             <button class="share-btn"
-                                    onclick="compartirNoticia('{{ noticia.titulo|escapejs }}', '{{ noticia.enlace|default:''|escapejs }}')"
-                                    aria-label="Compartir: {{ noticia.titulo }}">
+                                    onclick="compartirNoticia('{{ noticia.titulo|escapejs }}', '{{ noticia.enlace|default:''|escapejs }}', {{ noticia.id }})"
+                                    aria-label="Compartir: {{ noticia.titulo }}"
+                                    data-noticia-id="{{ noticia.id }}">
                                 <i class="fas fa-share"></i>
                             </button>
                         </div>
@@ -321,6 +322,27 @@
                     contadorElement.textContent = data.count.toLocaleString();
                 }
             });
+    }
+    function registrarVista(noticiaId) {
+    // Registrar la vista antes de redirigir
+    fetch(`/noticias/registrar-vista/${noticiaId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            console.log('Vista registrada');
+        }
+    })
+    .catch(error => {
+        console.error('Error al registrar vista:', error);
+    });
+    
+    // La redirección ocurre normalmente por el href
     }
     </script>
     {% block extra_js %}{% endblock %}

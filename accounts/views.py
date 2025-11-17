@@ -6,6 +6,8 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from scraping.models import Noticia, NoticiasVistas
+from accounts.utils import registrar_login
+from .models import Actividad
 
 from .forms import RegistroForm
 
@@ -65,6 +67,9 @@ def user_login(request):
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
+                
+                # REGISTRAR ACTIVIDAD DE LOGIN
+                registrar_login(user)
                 messages.success(request, f'¡Bienvenido {user.username}!')
                 
                 # Si el usuario es staff y viene del admin, redirigir al admin
@@ -96,6 +101,11 @@ def profile(request):
     noticias_vistas_count = NoticiasVistas.objects.filter(usuario=request.user).count()
     dias_activo = request.user.profile.dias_activo()
     
+        # Obtener actividades recientes (últimas 10)
+    actividades_recientes = Actividad.objects.filter(
+        usuario=request.user
+    ).select_related('noticia').order_by('-fecha_actividad')[:10]
+    
     # Obtener las noticias más recientes vistas
     noticias_recientes_vistas = NoticiasVistas.objects.filter(
         usuario=request.user
@@ -107,6 +117,7 @@ def profile(request):
         'noticias_vistas_count': noticias_vistas_count,
         'dias_activo': dias_activo,
         'noticias_recientes_vistas': noticias_recientes_vistas,
+        'actividades_recientes': actividades_recientes,
         'es_usuario_nuevo': request.user.profile.es_usuario_nuevo(),
     })
 

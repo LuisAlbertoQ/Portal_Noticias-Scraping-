@@ -97,42 +97,37 @@
                 <!-- Actividad Reciente -->
                 <div class="recent-activity">
                     <h3><i class="fas fa-history me-2"></i>Actividad Reciente</h3>
+                    
+                    {% for actividad in actividades_recientes %}
                     <div class="activity-item">
                         <div class="activity-icon">
-                            <i class="fas fa-eye"></i>
+                            {% if actividad.tipo == 'vista' %}
+                                <i class="fas fa-eye"></i>
+                            {% elif actividad.tipo == 'busqueda' %}
+                                <i class="fas fa-search"></i>
+                            {% elif actividad.tipo == 'compartir' %}
+                                <i class="fas fa-share"></i>
+                            {% elif actividad.tipo == 'login' %}
+                                <i class="fas fa-sign-in-alt"></i>
+                            {% elif actividad.tipo == 'scraping' %}
+                                <i class="fas fa-download"></i>
+                            {% else %}
+                                <i class="fas fa-circle"></i>
+                            {% endif %}
                         </div>
                         <div class="activity-content">
-                            <div class="activity-text">Viste noticia sobre tecnología</div>
-                            <div class="activity-time">Hace 2 horas</div>
+                            <div class="activity-text">{{ actividad.descripcion }}</div>
+                            <div class="activity-time">{{ actividad.tiempo_relativo }}</div>
                         </div>
                     </div>
+                    {% empty %}
                     <div class="activity-item">
-                        <div class="activity-icon">
-                            <i class="fas fa-search"></i>
-                        </div>
                         <div class="activity-content">
-                            <div class="activity-text">Buscaste "inteligencia artificial"</div>
-                            <div class="activity-time">Ayer, 10:15</div>
+                            <div class="activity-text">Aún no tienes actividad registrada</div>
+                            <div class="activity-time">Tu actividad aparecerá aquí</div>
                         </div>
                     </div>
-                    <div class="activity-item">
-                        <div class="activity-icon">
-                            <i class="fas fa-share"></i>
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-text">Compartiste noticia</div>
-                            <div class="activity-time">Ayer, 09:45</div>
-                        </div>
-                    </div>
-                    <div class="activity-item">
-                        <div class="activity-icon">
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-text">Guardaste noticia en favoritos</div>
-                            <div class="activity-time">Ayer, 15:30</div>
-                        </div>
-                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>

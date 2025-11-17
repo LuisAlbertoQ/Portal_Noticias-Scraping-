@@ -17,6 +17,8 @@ import {
     compartirNoticia,
     fallbackShare,
     legacyCopy,
+    registrarCompartirActividad,
+    detectarPlataformaCompartir,
     isMobileDevice,
     truncateText,
     formatDate,
@@ -127,11 +129,16 @@ class NewsPortalApp {
         window.compartirNoticia = compartirNoticia;
         window.fallbackShare = fallbackShare;
         window.legacyCopy = legacyCopy;
+        window.registrarCompartirActividad = registrarCompartirActividad;
+        window.detectarPlataformaCompartir = detectarPlataformaCompartir;
         window.isMobileDevice = isMobileDevice;
         window.truncateText = truncateText;
         window.formatDate = formatDate;
         window.smoothScrollTo = smoothScrollTo;
         window.debounce = debounce;
+
+        // Configurar event listeners para botones de compartir
+        this.setupShareButtons();
         
         // Info de debug (solo desarrollo)
         if (window.location.hostname === 'localhost') {
@@ -169,6 +176,21 @@ class NewsPortalApp {
         });
         this.modules.clear();
         this.isInitialized = false;
+    }
+
+    setupShareButtons() {
+        document.addEventListener('click', (event) => {
+            const shareBtn = event.target.closest('.share-btn');
+            if (shareBtn) {
+                const noticiaId = shareBtn.dataset.noticiaId;
+                const titulo = shareBtn.dataset.noticiaTitulo;
+                const enlace = shareBtn.dataset.noticiaEnlace;
+                
+                if (noticiaId && titulo) {
+                    compartirNoticia(titulo, enlace, parseInt(noticiaId));
+                }
+            }
+        });
     }
 }
 

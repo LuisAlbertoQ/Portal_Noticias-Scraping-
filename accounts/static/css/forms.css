@@ -56,7 +56,7 @@
 
 .form-control:focus {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px var(--primary-20);
+    box-shadow: 0 0 0 2px var(--secondary-20);
     outline: none;
 }
 
@@ -246,5 +246,5 @@
 
 .form-checkbox:focus {
     outline: none;
-    box-shadow: 0 0 0 2px var(--primary-20);
+    box-shadow: 0 0 0 2px var(--secondary-20);
 }

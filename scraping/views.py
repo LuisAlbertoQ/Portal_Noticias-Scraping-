@@ -12,6 +12,7 @@ from .tasks import scrape_all_sections, run_single_scrape
 from celery.result import AsyncResult
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from accounts.utils import registrar_busqueda, registrar_scraping, registrar_vista_noticia_actividad, registrar_compartir
 
 # Función helper mejorada para manejar lógica común de listas de noticias
 @login_required
@@ -22,6 +23,10 @@ def lista_noticias_helper(request, queryset_base, template_name, nav_type='comer
     fecha_desde = request.GET.get('fecha_desde', '')
     fecha_hasta = request.GET.get('fecha_hasta', '')
     busqueda = request.GET.get('q', '')
+    
+        # REGISTRAR BÚSQUEDA SI HAY TÉRMINO
+    if busqueda and request.user.is_authenticated:
+        registrar_busqueda(request.user, busqueda)
     
     noticias = queryset_base
     
@@ -225,54 +230,100 @@ def ejecutar_scraping_generico(request, command_name=None):
 def ejecutar_scraping_lista_noticias(request):
     if request.user.profile.role not in ['premium', 'admin']:
         raise PermissionDenied("Solo usuarios Premium pueden ejecutar scraping")
+    
+    # REGISTRAR ACTIVIDAD DE SCRAPING
+    registrar_scraping(request.user, "elcomercio - Noticias principales")
+    
     return ejecutar_scraping_generico(request, "scrape_elcomercio")
 
 @login_required
 def ejecutar_scraping_politica(request):
+    if request.user.profile.role not in ['premium', 'admin']:
+        raise PermissionDenied("Solo usuarios Premium pueden ejecutar scraping")
+    
+    # REGISTRAR ACTIVIDAD DE SCRAPING
+    registrar_scraping(request.user, "elcomecio - Politica")
+    
     return ejecutar_scraping_generico(request, "scrape_elcomercio_pol")
 
 @login_required
 def ejecutar_scraping_economia(request):
+    if request.user.profile.role not in ['premium', 'admin']:
+        raise PermissionDenied("Solo usuarios Premium pueden ejecutar scraping")
+    
+    # REGISTRAR ACTIVIDAD DE SCRAPING
+    registrar_scraping(request.user, "elcomecio - Economia")
+    
     return ejecutar_scraping_generico(request, "scrape_economia")
 
 @login_required
 def ejecutar_scraping_mundo(request):
+    if request.user.profile.role not in ['premium', 'admin']:
+        raise PermissionDenied("Solo usuarios Premium pueden ejecutar scraping")
+    
+    # REGISTRAR ACTIVIDAD DE SCRAPING
+    registrar_scraping(request.user, "elcomecio - Mundo")
+    
     return ejecutar_scraping_generico(request, "scrape_mundo")
 
 @login_required
 def ejecutar_scraping_tecnologia(request):
     if request.user.profile.role not in ['premium', 'admin']:
         raise PermissionDenied("Solo usuarios Premium pueden ejecutar scraping")
+    
+    # REGISTRAR ACTIVIDAD DE SCRAPING
+    registrar_scraping(request.user, "elcomecio - Tecnologia")
+    
     return ejecutar_scraping_generico(request, "scrape_tecnologia")
 
 @login_required
 def ejecutar_scraping_peru21(request):
     if request.user.profile.role not in ['premium', 'admin']:
         raise PermissionDenied("Solo usuarios Premium pueden ejecutar scraping")
+    
+    # REGISTRAR ACTIVIDAD DE SCRAPING
+    registrar_scraping(request.user, "Perú21 - Noticias principales")
+    
     return ejecutar_scraping_generico(request, "scrape_peru21")
 
 @login_required
 def ejecutar_scraping_peru21_deportes(request):
     if request.user.profile.role not in ['premium', 'admin']:
         raise PermissionDenied("Solo usuarios Premium pueden ejecutar scraping")
+    
+    # REGISTRAR ACTIVIDAD DE SCRAPING
+    registrar_scraping(request.user, "Perú21 - Deportes")
+    
     return ejecutar_scraping_generico(request, "scrape_peru21D")
 
 @login_required
 def ejecutar_scraping_peru21_gastronomia(request):
     if request.user.profile.role not in ['premium', 'admin']:
         raise PermissionDenied("Solo usuarios Premium pueden ejecutar scraping")
+    
+    # REGISTRAR ACTIVIDAD DE SCRAPING
+    registrar_scraping(request.user, "Perú21 - Gastronomía")
+    
     return ejecutar_scraping_generico(request, "scrape_peru21G")
 
 @login_required
 def ejecutar_scraping_peru21_investigacion(request):
     if request.user.profile.role not in ['premium', 'admin']:
         raise PermissionDenied("Solo usuarios Premium pueden ejecutar scraping")
+    
+    # REGISTRAR ACTIVIDAD DE SCRAPING
+    registrar_scraping(request.user, "Perú21 - Investigación")
+    
     return ejecutar_scraping_generico(request, "scrape_peru21I")
 
 @login_required
 def ejecutar_scraping_peru21_lima(request):
     if request.user.profile.role not in ['premium', 'admin']:
         raise PermissionDenied("Solo usuarios Premium pueden ejecutar scraping")
+    
+    # REGISTRAR ACTIVIDAD DE SCRAPING
+    registrar_scraping(request.user, "Perú21 - Lima")
+    
     return ejecutar_scraping_generico(request, "scrape_peru21L")
 
 # ===== VISTA API PARA ESTADÍSTICAS (OPCIONAL) =====
@@ -424,9 +475,39 @@ def registrar_vista_noticia(request, noticia_id):
             noticia=noticia
         )
         
+        # REGISTRAR ACTIVIDAD DE VISTA
+        registrar_vista_noticia_actividad(request.user, noticia)
+        
         return JsonResponse({
             'status': 'success',
             'message': 'Vista registrada correctamente'
+        })
+        
+    except Noticia.DoesNotExist:
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Noticia no encontrada'
+        }, status=404)
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)
+
+@login_required
+def registrar_compartir_noticia(request, noticia_id):
+    """Registra cuando un usuario comparte una noticia"""
+    try:
+        noticia = Noticia.objects.get(id=noticia_id)
+        plataforma = request.POST.get('plataforma', 'general')
+        
+        # REGISTRAR ACTIVIDAD DE COMPARTIR
+        registrar_compartir(request.user, noticia, plataforma)
+        
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Compartir registrado correctamente',
+            'plataforma': plataforma
         })
         
     except Noticia.DoesNotExist:

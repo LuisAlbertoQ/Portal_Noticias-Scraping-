@@ -119,7 +119,7 @@
 }
 
 .feature-icon.primary {
-    background: var(--primary-10);
+    background: var(--secondary-10);
 }
 
 .feature-icon.secondary {
