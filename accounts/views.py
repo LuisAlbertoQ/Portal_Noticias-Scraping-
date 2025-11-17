@@ -104,7 +104,7 @@ def profile(request):
         # Obtener actividades recientes (últimas 10)
     actividades_recientes = Actividad.objects.filter(
         usuario=request.user
-    ).select_related('noticia').order_by('-fecha_actividad')[:10]
+    ).select_related('noticia').order_by('-fecha_actividad')[:5]
     
     # Obtener las noticias más recientes vistas
     noticias_recientes_vistas = NoticiasVistas.objects.filter(
