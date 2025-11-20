@@ -25,6 +25,7 @@ import {
     smoothScrollTo,
     debounce
 } from '../utils/helpers.js';
+import { registrarVista, actualizarContadorVistas, initViewTracking } from '../components/view-tracking.js';
 
 // Exponer funciones globales de filtros
 window.clearFilters = clearFilters;
@@ -136,6 +137,13 @@ class NewsPortalApp {
         window.formatDate = formatDate;
         window.smoothScrollTo = smoothScrollTo;
         window.debounce = debounce;
+
+        // Exponer funciones usadas por templates (ya no necesarias si usas data-atributos)
+        window.registrarVista = registrarVista;
+        window.actualizarContadorVistas = actualizarContadorVistas;
+
+        // Activar delegación para registrar vistas sin onclick inline
+        initViewTracking();
 
         // Configurar event listeners para botones de compartir
         this.setupShareButtons();
