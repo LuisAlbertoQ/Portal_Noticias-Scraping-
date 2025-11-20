@@ -222,13 +222,25 @@
                                     Sin Enlace <i class="fas fa-eye-slash"></i>
                                 </a>
                             {% endif %}
+                            <!-- Contenedor secundario solo para mobile -->
+                            <div class="news-actions-secondary">
+                                <!-- BOTÓN ANALIZAR con texto para móvil -->
+                                <a href="#" 
+                                class="analyze-btn"
+                                aria-label="Analizar: {{ noticia.titulo }}"
+                                title="Analizar noticia"
+                                data-noticia-id="{{ noticia.id }}">
+                                    <i class="fas fa-chart-line"></i>
+                                    <span class="analyze-btn-text">Analizar</span>
+                                </a>
 
-                            <button class="share-btn"
-                                    onclick="compartirNoticia('{{ noticia.titulo|escapejs }}', '{{ noticia.enlace|default:''|escapejs }}', {{ noticia.id }})"
-                                    aria-label="Compartir: {{ noticia.titulo }}"
-                                    data-noticia-id="{{ noticia.id }}">
-                                <i class="fas fa-share"></i>
-                            </button>
+                                <button class="share-btn"
+                                        onclick="compartirNoticia('{{ noticia.titulo|escapejs }}', '{{ noticia.enlace|default:''|escapejs }}', {{ noticia.id }})"
+                                        aria-label="Compartir: {{ noticia.titulo }}"
+                                        data-noticia-id="{{ noticia.id }}">
+                                    <i class="fas fa-share"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </article>

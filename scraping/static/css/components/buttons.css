@@ -3,7 +3,7 @@
 /* Botón leer más */
 .read-more {
     background: var(--primary-gradient);
-    color: white;
+    color: var(--text-white);
     padding: 12px 24px;
     border-radius: 25px;
     text-decoration: none;
@@ -11,6 +11,7 @@
     transition: var(--transition);
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     font-size: 0.9rem;
     flex-shrink: 0;
@@ -19,7 +20,7 @@
 
 .read-more:hover {
     background: linear-gradient(135deg, var(--dark-primary), #1abc9c);
-    color: white;
+    color: var(--text-white);
     transform: translateX(5px) scale(1.05);
     box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
 }
@@ -44,7 +45,7 @@
 
 .share-btn:hover {
     background: var(--accent-color);
-    color: white;
+    color: var(--text-white);
     transform: scale(1.1) rotate(10deg);
     box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
 }
@@ -52,7 +53,7 @@
 /* Botón refresh */
 .refresh-btn {
     background: var(--primary-gradient);
-    color: white;
+    color:var(--text-white);
     border: 1px solid var(--success-color);
     padding: 12px 24px;
     border-radius: 25px;
@@ -67,7 +68,7 @@
 
 .refresh-btn:hover {
     background: linear-gradient(135deg, #2ecc71, var(--success-color));
-    color: white;
+    color: var(--text-white);
     transform: scale(1.05) translateY(-2px);
     box-shadow: 0 8px 25px rgba(39, 174, 96, 0.3);
 }
@@ -76,4 +77,150 @@
     opacity: 0.7;
     cursor: not-allowed;
     transform: none;
+}
+
+/* Botón de análisis - DESKTOP */
+.analyze-btn {
+    padding: 10px 16px;
+    background: linear-gradient(135deg, #8e44ad, #9b59b6);
+    color: var(--text-white);
+    border: 2px solid #8e44ad;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-shadow: 0 2px 8px rgba(142, 68, 173, 0.2);
+    width: 45px;
+    height: 45px;
+    flex-shrink: 0;
+}
+
+.analyze-btn:hover {
+    background: linear-gradient(135deg, #9b59b6, #8e44ad);
+    transform: scale(1.1) rotate(-10deg);
+    box-shadow: 0 5px 15px rgba(142, 68, 173, 0.4);
+}
+
+.analyze-btn:active {
+    transform: scale(1.05);
+}
+
+.analyze-btn i {
+    font-size: 1.1rem;
+}
+
+/* Texto del botón oculto por defecto */
+.analyze-btn-text {
+    display: none;
+}
+
+/* Ajuste del contenedor de acciones - MÁS SEPARACIÓN EN DESKTOP */
+.news-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px; /* Aumentado de 10px a 15px */
+    padding-top: 10px;
+    margin-top: auto;
+}
+
+/* Contenedor secundario para botones circulares con más espacio */
+.news-actions-secondary {
+    display: flex;
+    gap: 15px; /* Separación entre Analizar y Compartir */
+    align-items: center;
+}
+
+/* El botón "Leer más" toma más espacio en desktop */
+.read-more {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Los botones de acción tienen tamaño fijo en desktop */
+.analyze-btn,
+.share-btn {
+    flex-shrink: 0;
+}
+
+/* ===== RESPONSIVE: TABLET ===== */
+@media (max-width: 768px) {
+    .news-actions {
+        gap: 12px;
+    }
+    
+    .news-actions-secondary {
+        gap: 12px;
+    }
+    
+    .read-more {
+        font-size: 0.9rem;
+        padding: 10px 16px;
+    }
+    
+    .analyze-btn,
+    .share-btn {
+        width: 42px;
+        height: 42px;
+    }
+    
+    .analyze-btn i,
+    .share-btn i {
+        font-size: 1rem;
+    }
+}
+
+/* ===== RESPONSIVE: MOBILE ===== */
+@media (max-width: 480px) {
+    .news-actions {
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+    }
+    
+    /* Botón Leer más - ancho completo */
+    .read-more {
+        width: 100%;
+        flex: none;
+        justify-content: center;
+        padding: 12px 20px;
+        font-size: 0.95rem;
+    }
+    
+    /* Contenedor para los botones circulares en mobile */
+    .news-actions-secondary {
+        display: flex;
+        gap: 10px;
+        width: 100%;
+    }
+    
+    /* Botón Analizar - EXPANDIDO en móvil */
+    .analyze-btn {
+        flex: 1;
+        width: auto;
+        height: 45px;
+        border-radius: 25px;
+        padding: 12px 20px;
+        gap: 8px;
+    }
+    
+    .analyze-btn-text {
+        display: inline;
+        font-weight: 600;
+    }
+    
+    .analyze-btn:hover {
+        transform: scale(1.02);
+    }
+    
+    /* Botón Compartir - mantiene circular pero ajustado */
+    .share-btn {
+        width: 45px;
+        height: 45px;
+        flex-shrink: 0;
+    }
 }
