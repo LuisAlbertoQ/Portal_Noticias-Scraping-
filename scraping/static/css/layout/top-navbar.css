@@ -48,13 +48,13 @@
 
 .portal-link:hover {
     background: rgba(255, 255, 255, 0.15);
-    color: white;
+    color: var(--text-white);
     transform: translateY(-2px);
 }
 
 .portal-link.active {
     background: rgba(255, 255, 255, 0.25);
-    color: white;
+    color: var(--text-white);
     border-color: rgba(255, 255, 255, 0.4);
     font-weight: 700;
 }

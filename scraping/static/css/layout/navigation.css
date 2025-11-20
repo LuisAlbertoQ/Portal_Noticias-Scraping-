@@ -58,7 +58,7 @@
     background: var(--primary-gradient);
     transform: scale(1.05) translateY(-2px);
     box-shadow: 0 8px 25px rgba(111, 186, 236, 0.4);
-    color: white;
+    color: var(--text-white);
 }
 
 .nav-link i {
