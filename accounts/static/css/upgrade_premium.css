@@ -64,7 +64,7 @@
 }
 
 .payment-method:hover {
-    border-color: #3498db;
+    border-color: var(--primary-color);
 }
 
 .payment-method input[type="radio"] {
@@ -138,7 +138,7 @@
 }
 
 .btn-primary {
-    background: #3498db;
+    background: var(--primary-color);
     color: var(--text-light);
 }
 
@@ -148,12 +148,12 @@
 
 .btn-outline {
     background: transparent;
-    color: #3498db;
-    border: 1px solid #3498db;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
 }
 
 .btn-outline:hover {
-    background: #3498db;
+    background: var(--primary-color);
     color: var(--text-light);
 }
 
