@@ -11,4 +11,6 @@ urlpatterns = [
     path('planes/', views.planes, name='planes'),
     path('upgrade/', views.upgrade_premium, name='upgrade_premium'),
     path('payment/success/', views.payment_success, name='payment_success'),
+    
+    path('cancelar-premium/', views.cancelar_premium, name='cancelar_premium'),
 ]

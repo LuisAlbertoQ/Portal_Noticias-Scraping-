@@ -101,7 +101,7 @@ def profile(request):
     noticias_vistas_count = NoticiasVistas.objects.filter(usuario=request.user).count()
     dias_activo = request.user.profile.dias_activo()
     
-        # Obtener actividades recientes (últimas 10)
+    # Obtener actividades recientes (últimas 10)
     actividades_recientes = Actividad.objects.filter(
         usuario=request.user
     ).select_related('noticia').order_by('-fecha_actividad')[:5]
@@ -111,6 +111,9 @@ def profile(request):
         usuario=request.user
     ).select_related('noticia').order_by('-fecha_vista')[:5]
     
+    # Verificar si el usuario es Premium
+    is_premium = request.user.profile.role == 'premium'
+    
     return render(request, 'accounts/profile.html', {
         'user': request.user,
         'role': request.user.profile.get_role_display(),
@@ -119,6 +122,7 @@ def profile(request):
         'noticias_recientes_vistas': noticias_recientes_vistas,
         'actividades_recientes': actividades_recientes,
         'es_usuario_nuevo': request.user.profile.es_usuario_nuevo(),
+        'is_premium': is_premium,
     })
 
 @login_required
@@ -158,3 +162,23 @@ def upgrade_premium(request):
 def payment_success(request):
     """Vista para mostrar después de un pago exitoso"""
     return render(request, 'accounts/payment_success.html')
+
+@login_required
+def cancelar_premium(request):
+    """Vista para cancelar la suscripción Premium"""
+    if request.method == 'POST':
+        # Verificar si el usuario es Premium
+        if request.user.profile.role == 'premium':
+            # Cambiar el rol del usuario a normal
+            profile = request.user.profile
+            profile.role = 'normal'
+            profile.save()
+            
+            messages.success(request, 'Tu suscripción Premium ha sido cancelada. Ahora eres un usuario normal.')
+        else:
+            messages.error(request, 'No tienes una suscripción Premium activa.')
+        
+        return redirect('profile')
+    
+    # Si es GET, redirigir al perfil
+    return redirect('profile')

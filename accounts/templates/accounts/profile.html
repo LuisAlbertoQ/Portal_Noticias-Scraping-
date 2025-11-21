@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
 <div class="fade-in">
     <section class="profile-section">
         <div class="profile-container">
@@ -11,7 +12,11 @@
                     <i class="fas fa-user"></i>
                 </div>
                 <h2>{{ user.username }}</h2>
-                <div class="profile-role">{{ role|default:"Usuario" }}</div>
+                {% if is_premium %}
+                <div class="premium-badge">
+                    <i class="fas fa-crown"></i> Premium
+                </div>
+                {% endif %}
             </div>
 
             <!-- Contenido del Perfil -->
@@ -68,6 +73,49 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Gestión de Suscripción -->
+                {% if is_premium %}
+                <div class="subscription-card">
+                    <h3><i class="fas fa-crown me-2"></i>Gestión de Suscripción</h3>
+                    <div class="subscription-info">
+                        <div class="subscription-status">
+                            <span class="status-label">Estado:</span>
+                            <span class="status-value premium">Activa</span>
+                        </div>
+                        <div class="subscription-plan">
+                            <span class="plan-label">Plan:</span>
+                            <span class="plan-value">Premium - S/. 6.99/mes</span>
+                        </div>
+                    </div>
+                    <div class="subscription-actions">
+                        <button class="btn btn-outline" onclick="window.location.href='{% url 'planes' %}'">
+                            <i class="fas fa-edit me-2"></i>Modificar Plan
+                        </button>
+                        <button class="btn btn-danger" onclick="showCancelModal()">
+                            <i class="fas fa-times me-2"></i>Cancelar Suscripción
+                        </button>
+                    </div>
+                </div>
+                {% else %}
+                <div class="subscription-card">
+                    <h3><i class="fas fa-rocket me-2"></i>Mejora tu Cuenta</h3>
+                    <div class="upgrade-info">
+                        <p>Actualiza a Premium para desbloquear todas las funcionalidades:</p>
+                        <ul class="premium-features-list">
+                            <li><i class="fas fa-check me-2"></i>Acceso completo a scraping de noticias</li>
+                            <li><i class="fas fa-check me-2"></i>Filtros avanzados de búsqueda</li>
+                            <li><i class="fas fa-check me-2"></i>Análisis detallado de noticias</li>
+                            <li><i class="fas fa-check me-2"></i>Soporte prioritario</li>
+                        </ul>
+                    </div>
+                    <div class="subscription-actions">
+                        <button class="btn btn-primary" onclick="window.location.href='{% url 'planes' %}'">
+                            <i class="fas fa-crown me-2"></i>Actualizar a Premium
+                        </button>
+                    </div>
+                </div>
+                {% endif %}
 
                 <!-- Acciones Rápidas -->
                 <div class="quick-actions">
@@ -133,4 +181,36 @@
         </div>
     </section>
 </div>
+
+<!-- Modal de Confirmación de Cancelación -->
+<div id="cancel-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Cancelar Suscripción Premium</h3>
+            <span class="close-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="cancel-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h4>¿Estás seguro de que quieres cancelar tu suscripción?</h4>
+                <p>Al cancelar tu suscripción Premium, perderás acceso a:</p>
+                <ul>
+                    <li>Scraping ilimitado de noticias</li>
+                    <li>Filtros avanzados de búsqueda</li>
+                    <li>Análisis detallado de noticias</li>
+                    <li>Soporte prioritario</li>
+                </ul>
+                <p>Puedes volver a suscribirte en cualquier momento si lo deseas.</p>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeCancelModal()">Mantener Suscripción</button>
+                <form method="post" action="{% url 'cancelar_premium' %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Confirmar Cancelación</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{% static 'js/profile.js' %}"></script>
 {% endblock %}
