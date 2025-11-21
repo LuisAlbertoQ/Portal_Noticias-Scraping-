@@ -1,0 +1,265 @@
+<div id="upgrade-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Actualiza a Premium</h3>
+            <span class="close-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="upgrade-info">
+                <div class="upgrade-icon">
+                    <i class="fas fa-crown"></i>
+                </div>
+                <h4>Desbloquea todas las funcionalidades</h4>
+                <p>Actualiza a Premium para acceder a:</p>
+                
+                <div class="premium-features">
+                    <div class="feature-item">
+                        <i class="fas fa-robot"></i>
+                        <span>Scraping ilimitado de noticias</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-filter"></i>
+                        <span>Filtros avanzados de búsqueda</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Análisis detallado de noticias</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-headset"></i>
+                        <span>Soporte prioritario</span>
+                    </div>
+                </div>
+                
+                <div class="pricing-info">
+                    <div class="price-tag">
+                        <span class="currency">$</span>
+                        <span class="amount">9.99</span>
+                        <span class="period">/mes</span>
+                    </div>
+                    <p>Cancela en cualquier momento</p>
+                </div>
+            </div>
+            <div class="upgrade-actions">
+                <button class="btn btn-outline" onclick="window.closeUpgradeModal()">Ahora no</button>
+                <a href="{% url 'planes' %}" class="btn btn-primary">Ver Planes</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Funciones para manejar el modal de actualización
+window.showUpgradeModal = function() {
+    const modal = document.getElementById('upgrade-modal');
+    if (modal) {
+        modal.style.display = 'block';
+    }
+}
+
+window.closeUpgradeModal = function() {
+    const modal = document.getElementById('upgrade-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Cerrar modal al hacer clic fuera de él (en el fondo oscuro)
+window.onclick = function(event) {
+    const modal = document.getElementById('upgrade-modal');
+    // Comprueba si el elemento clickeado es el fondo del modal
+    if (event.target == modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Cerrar modal al hacer clic en la 'X'
+document.addEventListener('DOMContentLoaded', function() {
+    const closeBtn = document.querySelector('.close-modal');
+    if (closeBtn) {
+        closeBtn.onclick = function() {
+            window.closeUpgradeModal();
+        }
+    }
+});
+</script>
+
+<style>
+/* Estilos para el modal de actualización */
+.modal {
+    display: none; /* Oculto por defecto */
+    position: fixed; /* Se queda en su sitio al hacer scroll */
+    z-index: 1000; /* Por encima de todo */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; /* Habilita scroll si es necesario */
+    background-color: rgba(0,0,0,0.5); /* Fondo oscuro con opacidad */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 10% auto; /* 10% desde arriba y centrado horizontalmente */
+    padding: 0;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    animation: modalopen 0.4s;
+}
+
+@keyframes modalopen {
+    from {opacity: 0; transform: translateY(-50px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #2c3e50;
+}
+
+.close-modal {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-modal:hover,
+.close-modal:focus {
+    color: #000;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.upgrade-info {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.upgrade-icon {
+    font-size: 48px;
+    color: #f39c12;
+    margin-bottom: 20px;
+}
+
+.upgrade-info h4 {
+    margin-bottom: 15px;
+    color: #2c3e50;
+}
+
+.upgrade-info p {
+    color: #7f8c8d;
+    margin-bottom: 25px;
+}
+
+.premium-features {
+    text-align: left;
+    margin-bottom: 25px;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.feature-item i {
+    color: #3498db;
+    font-size: 18px;
+    margin-right: 15px;
+    width: 25px;
+}
+
+.pricing-info {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+}
+
+.price-tag {
+    font-size: 32px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.currency {
+    font-size: 20px;
+    vertical-align: super;
+}
+
+.period {
+    font-size: 16px;
+    color: #7f8c8d;
+}
+
+.pricing-info p {
+    margin: 0;
+    color: #7f8c8d;
+    font-size: 14px;
+}
+
+.upgrade-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    flex: 1;
+}
+
+.btn-primary {
+    background: #3498db;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #2980b9;
+}
+
+.btn-outline {
+    background: transparent;
+    color: #3498db;
+    border: 1px solid #3498db;
+}
+
+.btn-outline:hover {
+    background: #3498db;
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        margin: 15% auto;
+    }
+    
+    .upgrade-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+</style>

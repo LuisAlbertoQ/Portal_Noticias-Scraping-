@@ -126,3 +126,35 @@ def obtener_contador_vistas(request):
     """API para obtener el contador de noticias vistas del usuario"""
     count = NoticiasVistas.objects.filter(usuario=request.user).count()
     return JsonResponse({'count': count})
+
+@login_required
+def planes(request):
+    """Vista para mostrar los planes disponibles"""
+    return render(request, 'accounts/planes.html')
+
+@login_required
+def upgrade_premium(request):
+    """Vista para procesar la actualización a Premium"""
+    if request.method == 'POST':
+        # Simulación de procesamiento de pago
+        # En un caso real, aquí procesarías el pago con una pasarela real
+        payment_method = request.POST.get('payment_method', 'credit_card')
+        
+        # Simulación de éxito del pago
+        if payment_method:
+            # Actualizar el rol del usuario a Premium
+            profile = request.user.profile
+            profile.role = 'premium'
+            profile.save()
+            
+            messages.success(request, '¡Felicidades! Ahora tienes una cuenta Premium.')
+            return redirect('profile')
+        else:
+            messages.error(request, 'Por favor selecciona un método de pago válido.')
+    
+    return render(request, 'accounts/upgrade_premium.html')
+
+@login_required
+def payment_success(request):
+    """Vista para mostrar después de un pago exitoso"""
+    return render(request, 'accounts/payment_success.html')

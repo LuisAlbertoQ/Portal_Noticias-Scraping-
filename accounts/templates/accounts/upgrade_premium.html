@@ -1,0 +1,269 @@
+{% extends 'base_auth.html' %}
+{% load static %}
+
+{% block title %}Actualizar a Premium - NewsMiner{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/upgrade_premium.css' %}">
+<div class="upgrade-container">
+    <h2>Completa tu actualización a Premium</h2>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    <div class="payment-form-container">
+        <form method="post" id="payment-form">
+            {% csrf_token %}
+            <div class="payment-summary">
+                <h3>Resumen del Pedido</h3>
+                <div class="order-item">
+                    <span>Plan Premium - Suscripción mensual</span>
+                    <span>$9.99</span>
+                </div>
+                <div class="order-total">
+                    <span>Total a pagar</span>
+                    <span>$9.99</span>
+                </div>
+            </div>
+            
+            <div class="payment-methods">
+                <h3>Método de Pago</h3>
+                <div class="payment-method">
+                    <input type="radio" id="credit-card" name="payment_method" value="credit_card" checked>
+                    <label for="credit-card">
+                        <i class="fas fa-credit-card"></i> Tarjeta de Crédito/Débito
+                    </label>
+                </div>
+                <div class="payment-method">
+                    <input type="radio" id="paypal" name="payment_method" value="paypal">
+                    <label for="paypal">
+                        <i class="fab fa-paypal"></i> PayPal
+                    </label>
+                </div>
+            </div>
+            
+            <div class="card-details">
+                <h3>Detalles de la Tarjeta</h3>
+                <div class="form-group">
+                    <label for="card-number">Número de Tarjeta</label>
+                    <input type="text" id="card-number" name="card_number" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="card-expiry">Fecha de Vencimiento</label>
+                        <input type="text" id="card-expiry" name="card_expiry" placeholder="MM/AA" maxlength="5" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="card-cvc">CVC</label>
+                        <input type="text" id="card-cvc" name="card_cvc" placeholder="123" maxlength="3" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="card-name">Nombre en la Tarjeta</label>
+                    <input type="text" id="card-name" name="card_name" placeholder="John Doe" required>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <a href="{% url 'planes' %}" class="btn btn-outline">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Pagar $9.99</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.upgrade-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.upgrade-container h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #2c3e50;
+}
+
+.payment-form-container {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    padding: 30px;
+}
+
+.payment-summary {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.payment-summary h3 {
+    margin-bottom: 20px;
+    color: #2c3e50;
+}
+
+.order-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+}
+
+.order-total {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px 0;
+    font-weight: bold;
+    font-size: 18px;
+    border-top: 1px solid #eee;
+    margin-top: 15px;
+}
+
+.payment-methods {
+    margin-bottom: 30px;
+}
+
+.payment-methods h3 {
+    margin-bottom: 20px;
+    color: #2c3e50;
+}
+
+.payment-method {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.payment-method:hover {
+    border-color: #3498db;
+}
+
+.payment-method input[type="radio"] {
+    margin-right: 10px;
+}
+
+.payment-method label {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.payment-method i {
+    margin-right: 10px;
+    font-size: 20px;
+}
+
+.card-details {
+    margin-bottom: 30px;
+}
+
+.card-details h3 {
+    margin-bottom: 20px;
+    color: #2c3e50;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #2c3e50;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.form-row {
+    display: flex;
+    gap: 20px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    flex: 1;
+}
+
+.btn-primary {
+    background: #3498db;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #2980b9;
+}
+
+.btn-outline {
+    background: transparent;
+    color: #3498db;
+    border: 1px solid #3498db;
+}
+
+.btn-outline:hover {
+    background: #3498db;
+    color: white;
+}
+
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.alert-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+}
+<script src="{% static 'js/upgrade_premium.js' %}"></script>
+{% endblock %}

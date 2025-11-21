@@ -1,0 +1,140 @@
+{% extends 'base_auth.html' %}
+{% load static %}
+
+{% block title %}Pago Exitoso - NewsMiner{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/payment_success.css' %}">
+<div class="success-container">
+    <div class="success-icon">
+        <i class="fas fa-check-circle"></i>
+    </div>
+    <h2>¡Pago Exitoso!</h2>
+    <p>Tu cuenta ha sido actualizada a Premium exitosamente.</p>
+    <p>Ahora tienes acceso a todas las funcionalidades Premium, incluyendo:</p>
+    
+    <div class="premium-features">
+        <div class="feature-item">
+            <i class="fas fa-robot"></i>
+            <span>Acceso completo a scraping de noticias</span>
+        </div>
+        <div class="feature-item">
+            <i class="fas fa-filter"></i>
+            <span>Filtros avanzados de búsqueda</span>
+        </div>
+        <div class="feature-item">
+            <i class="fas fa-chart-line"></i>
+            <span>Análisis detallado de noticias</span>
+        </div>
+        <div class="feature-item">
+            <i class="fas fa-headset"></i>
+            <span>Soporte prioritario</span>
+        </div>
+    </div>
+    
+    <div class="success-actions">
+        <a href="{% url 'profile' %}" class="btn btn-primary">Ir a mi Perfil</a>
+        <a href="{% url 'lista_noticias' %}" class="btn btn-outline">Explorar Noticias</a>
+    </div>
+</div>
+
+<style>
+.success-container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 30px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.success-icon {
+    font-size: 80px;
+    color: #2ecc71;
+    margin-bottom: 20px;
+}
+
+.success-container h2 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+.success-container p {
+    color: #7f8c8d;
+    margin-bottom: 30px;
+    font-size: 16px;
+}
+
+.premium-features {
+    margin: 40px 0;
+    text-align: left;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.feature-item:last-child {
+    border-bottom: none;
+}
+
+.feature-item i {
+    color: #3498db;
+    font-size: 20px;
+    margin-right: 15px;
+    width: 30px;
+}
+
+.success-actions {
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.btn {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-primary {
+    background: #3498db;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #2980b9;
+}
+
+.btn-outline {
+    background: transparent;
+    color: #3498db;
+    border: 1px solid #3498db;
+}
+
+.btn-outline:hover {
+    background: #3498db;
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .success-actions {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .btn {
+        width: 100%;
+    }
+}
+{% endblock %}

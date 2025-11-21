@@ -37,6 +37,24 @@ class NotificationSystem {
         this.processQueue();
     }
     
+    // Método especial para notificaciones de permisos
+    showPermissionNotification(message, actionCallback) {
+        const notification = {
+            id: `notification-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            message,
+            type: 'warning',
+            duration: 8000, // Más tiempo para notificaciones de permisos
+            timestamp: Date.now(),
+            action: {
+                text: 'Actualizar a Premium',
+                callback: actionCallback
+            }
+        };
+        
+        this.queue.push(notification);
+        this.processQueue();
+    }
+    
     processQueue() {
         if (this.isShowing || this.queue.length === 0) return;
         
@@ -75,9 +93,15 @@ class NotificationSystem {
             transition: transform 0.3s ease, opacity 0.3s ease;
         `;
         
+        let actionButton = '';
+        if (notification.action) {
+            actionButton = `<button class="notification-action" style="background: rgba(255,255,255,0.2); border: 1px solid white; color: white; cursor: pointer; font-size: 14px; padding: 5px 10px; border-radius: 5px;">${notification.action.text}</button>`;
+        }
+        
         element.innerHTML = `
             <i class="fas ${this.getIconForType(notification.type)}"></i>
             <span style="flex: 1;">${notification.message}</span>
+            ${actionButton}
             <button class="notification-close" style="background: none; border: none; color: white; cursor: pointer; font-size: 16px;">&times;</button>
         `;
         
@@ -85,6 +109,16 @@ class NotificationSystem {
         
         const closeBtn = element.querySelector('.notification-close');
         this.setupNotificationEvents(element, closeBtn, notification);
+        
+        // Configurar evento para el botón de acción si existe
+        if (notification.action) {
+            const actionBtn = element.querySelector('.notification-action');
+            actionBtn.addEventListener('click', () => {
+                clearTimeout(element._autoRemoveTimer);
+                this.removeNotification(element);
+                notification.action.callback();
+            });
+        }
         
         // Auto-remove
         const autoRemove = setTimeout(() => {

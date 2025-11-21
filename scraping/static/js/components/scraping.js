@@ -57,7 +57,7 @@ class ScrapingManager {
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Scrapeando...';
             button.classList.add('loading', 'scraping-active');
 
-            // 🔄 MOSTRAR PANTALLA DE CARGA INMEDIATA
+            // MOSTRAR PANTALLA DE CARGA INMEDIATA
             this.showLoadingScreen(`Iniciando scraping de ${category}...`);
 
             const csrfToken = this.getCSRFToken();
@@ -76,6 +76,11 @@ class ScrapingManager {
             // Verificar respuesta
             const contentType = response.headers.get('content-type');
             if (!contentType || !contentType.includes('application/json')) {
+                // Si es un error 403, lanzar un error específico
+                if (response.status === 403) {
+                    throw new Error('Permission denied');
+                }
+
                 const text = await response.text();
                 throw new Error(`Respuesta no JSON: ${text.substring(0, 100)}...`);
             }
@@ -83,11 +88,15 @@ class ScrapingManager {
             const data = await response.json();
 
             if (!response.ok) {
+                // Si es un error 403, lanzar un error específico
+                if (response.status === 403) {
+                    throw new Error('Permission denied');
+                }
                 throw new Error(data.message || `Error HTTP ${response.status}`);
             }
 
             if (data.status === 'ok') {
-                // ✅ Tarea enviada a Celery - empezar polling
+                // Tarea enviada a Celery - empezar polling
                 showNotification(`Scraping de ${category} iniciado...`, 'info');
                 this.currentTaskId = data.task_id;
                 await this.monitorTaskCompletion(data.task_id, category);
@@ -103,7 +112,12 @@ class ScrapingManager {
             let errorMessage = 'Error en el scraping';
             if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
                 errorMessage = 'Error de conexión. Verifica tu internet.';
-            } else if (error.message.includes('403')) {
+            } else if (error.message.includes('403') || error.message.includes('Permission denied')) {
+                // Mostrar una notificación simple de advertencia
+                showNotification(`Para ejecutar scraping de ${category}, necesitas una cuenta Premium.`, 'warning');
+                
+                // MOSTRAR EL MODAL AUTOMÁTICAMENTE
+                window.showUpgradeModal();
                 errorMessage = 'Error de permisos. Recarga la página.';
             } else if (error.message.includes('Respuesta no JSON')) {
                 errorMessage = 'Error en el servidor. La respuesta no es válida.';
@@ -111,7 +125,9 @@ class ScrapingManager {
                 errorMessage = 'Error en la tarea de scraping. Inténtalo de nuevo.';
             }
             
-            showNotification(`${errorMessage}: ${category}`, 'error');
+            if (!error.message.includes('403') && !error.message.includes('Permission denied')) {
+                showNotification(`${errorMessage}: ${category}`, 'error');
+            }
             
             // Restaurar botón
             button.disabled = originalDisabled;
@@ -467,6 +483,94 @@ class ScrapingManager {
             clearTimeout(timeoutId);
             throw error;
         }
+    }
+    showPermissionDeniedNotification(category) {
+        // Crear notificación personalizada para permisos denegados
+        const notificationId = `permission-denied-${Date.now()}`;
+        
+        // Crear HTML de la notificación
+        const notificationHTML = `
+            <div id="${notificationId}" class="notification permission-denied" style="
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 10000;
+                max-width: 400px;
+                background: #f39c12;
+                color: white;
+                padding: 15px 20px;
+                border-radius: 10px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                animation: slideInFromRight 0.3s ease;
+            ">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 20px;"></i>
+                    <span style="font-weight: 500;">Permiso denegado</span>
+                    <button class="notification-close" style="
+                        background: none;
+                        border: none;
+                        color: white;
+                        cursor: pointer;
+                        font-size: 16px;
+                        margin-left: auto;
+                    ">&times;</button>
+                </div>
+                <div style="font-size: 14px;">
+                    Para ejecutar scraping de ${category}, necesitas una cuenta Premium.
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button class="btn-upgrade" style="
+                        background: rgba(255,255,255,0.2);
+                        border: 1px solid white;
+                        color: white;
+                        cursor: pointer;
+                        font-size: 14px;
+                        padding: 5px 10px;
+                        border-radius: 5px;
+                    ">Actualizar a Premium</button>
+                </div>
+            </div>
+        `;
+        
+        // Añadir al DOM
+        document.body.insertAdjacentHTML('beforeend', notificationHTML);
+        
+        // Configurar eventos
+        const notification = document.getElementById(notificationId);
+        const closeBtn = notification.querySelector('.notification-close');
+        const upgradeBtn = notification.querySelector('.btn-upgrade');
+        
+        // Cerrar al hacer click en la X
+        closeBtn.addEventListener('click', () => {
+            notification.style.transform = 'translateX(100%)';
+            notification.style.opacity = '0';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        });
+        
+        // Redirigir al hacer click en "Actualizar a Premium"
+        upgradeBtn.addEventListener('click', () => {
+            window.location.href = '/accounts/upgrade/';
+        });
+        
+        // Auto-eliminar después de 10 segundos
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.style.transform = 'translateX(100%)';
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }
+        }, 10000);
     }
     
     setupGlobalHandlers() {

@@ -196,6 +196,14 @@ def ejecutar_scraping_generico(request, command_name=None):
     """Ejecuta scraping de manera asíncrona usando Celery"""
     if request.method == "POST":
         try:
+            # Verificar permisos antes de procesar
+            if request.user.profile.role not in ['premium', 'admin']:
+                return JsonResponse({
+                    "status": "error",
+                    "message": "Solo usuarios Premium pueden ejecutar scraping",
+                    "error_type": "permission_denied"
+                }, status=403)
+                
             # Si se pasa un comando específico
             if command_name:
                 if command_name:
@@ -227,10 +235,7 @@ def ejecutar_scraping_generico(request, command_name=None):
 
 # ===== VISTAS DE SCRAPING ESPECÍFICAS =====
 @login_required
-def ejecutar_scraping_lista_noticias(request):
-    if request.user.profile.role not in ['premium', 'admin']:
-        raise PermissionDenied("Solo usuarios Premium pueden ejecutar scraping")
-    
+def ejecutar_scraping_lista_noticias(request):   
     # REGISTRAR ACTIVIDAD DE SCRAPING
     registrar_scraping(request.user, "elcomercio - Noticias principales")
     
@@ -238,19 +243,13 @@ def ejecutar_scraping_lista_noticias(request):
 
 @login_required
 def ejecutar_scraping_politica(request):
-    if request.user.profile.role not in ['premium', 'admin']:
-        raise PermissionDenied("Solo usuarios Premium pueden ejecutar scraping")
-    
     # REGISTRAR ACTIVIDAD DE SCRAPING
     registrar_scraping(request.user, "elcomecio - Politica")
     
     return ejecutar_scraping_generico(request, "scrape_elcomercio_pol")
 
 @login_required
-def ejecutar_scraping_economia(request):
-    if request.user.profile.role not in ['premium', 'admin']:
-        raise PermissionDenied("Solo usuarios Premium pueden ejecutar scraping")
-    
+def ejecutar_scraping_economia(request):    
     # REGISTRAR ACTIVIDAD DE SCRAPING
     registrar_scraping(request.user, "elcomecio - Economia")
     
@@ -258,9 +257,6 @@ def ejecutar_scraping_economia(request):
 
 @login_required
 def ejecutar_scraping_mundo(request):
-    if request.user.profile.role not in ['premium', 'admin']:
-        raise PermissionDenied("Solo usuarios Premium pueden ejecutar scraping")
-    
     # REGISTRAR ACTIVIDAD DE SCRAPING
     registrar_scraping(request.user, "elcomecio - Mundo")
     
@@ -268,9 +264,6 @@ def ejecutar_scraping_mundo(request):
 
 @login_required
 def ejecutar_scraping_tecnologia(request):
-    if request.user.profile.role not in ['premium', 'admin']:
-        raise PermissionDenied("Solo usuarios Premium pueden ejecutar scraping")
-    
     # REGISTRAR ACTIVIDAD DE SCRAPING
     registrar_scraping(request.user, "elcomecio - Tecnologia")
     
@@ -278,9 +271,6 @@ def ejecutar_scraping_tecnologia(request):
 
 @login_required
 def ejecutar_scraping_peru21(request):
-    if request.user.profile.role not in ['premium', 'admin']:
-        raise PermissionDenied("Solo usuarios Premium pueden ejecutar scraping")
-    
     # REGISTRAR ACTIVIDAD DE SCRAPING
     registrar_scraping(request.user, "Perú21 - Noticias principales")
     
@@ -288,9 +278,6 @@ def ejecutar_scraping_peru21(request):
 
 @login_required
 def ejecutar_scraping_peru21_deportes(request):
-    if request.user.profile.role not in ['premium', 'admin']:
-        raise PermissionDenied("Solo usuarios Premium pueden ejecutar scraping")
-    
     # REGISTRAR ACTIVIDAD DE SCRAPING
     registrar_scraping(request.user, "Perú21 - Deportes")
     
@@ -298,9 +285,6 @@ def ejecutar_scraping_peru21_deportes(request):
 
 @login_required
 def ejecutar_scraping_peru21_gastronomia(request):
-    if request.user.profile.role not in ['premium', 'admin']:
-        raise PermissionDenied("Solo usuarios Premium pueden ejecutar scraping")
-    
     # REGISTRAR ACTIVIDAD DE SCRAPING
     registrar_scraping(request.user, "Perú21 - Gastronomía")
     
@@ -308,9 +292,6 @@ def ejecutar_scraping_peru21_gastronomia(request):
 
 @login_required
 def ejecutar_scraping_peru21_investigacion(request):
-    if request.user.profile.role not in ['premium', 'admin']:
-        raise PermissionDenied("Solo usuarios Premium pueden ejecutar scraping")
-    
     # REGISTRAR ACTIVIDAD DE SCRAPING
     registrar_scraping(request.user, "Perú21 - Investigación")
     
@@ -318,9 +299,6 @@ def ejecutar_scraping_peru21_investigacion(request):
 
 @login_required
 def ejecutar_scraping_peru21_lima(request):
-    if request.user.profile.role not in ['premium', 'admin']:
-        raise PermissionDenied("Solo usuarios Premium pueden ejecutar scraping")
-    
     # REGISTRAR ACTIVIDAD DE SCRAPING
     registrar_scraping(request.user, "Perú21 - Lima")
     

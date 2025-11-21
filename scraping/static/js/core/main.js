@@ -125,6 +125,23 @@ class NewsPortalApp {
         // Exponer utilidades globalmente
         window.appState = appState;
         window.notificationSystem = window.notificationSystem || { show: showNotification };
+        // Exponer funciones del modal de actualización
+        window.showUpgradeModal = () => {
+            const modal = document.getElementById('upgrade-modal');
+            if (modal) {
+                modal.style.display = 'block';
+            } else {
+                // Fallback si el modal no está disponible
+                window.location.href = '/accounts/planes/';
+            }
+        };
+        
+        window.closeUpgradeModal = () => {
+            const modal = document.getElementById('upgrade-modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        };
         
         // Exponer funciones globales
         window.compartirNoticia = compartirNoticia;
