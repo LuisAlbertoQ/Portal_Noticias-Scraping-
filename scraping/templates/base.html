@@ -233,6 +233,11 @@
                                     <i class="fas fa-chart-line"></i>
                                     <span class="analyze-btn-text">Analizar</span>
                                 </a>
+                                {% if noticia.analisis and noticia.analisis.estado == 'completado' %}
+                                <span class="badge badge-success" title="Analizada">
+                                    <i class="fas fa-check"></i> IA
+                                </span>
+                                {% endif %}
 
                                 <button class="share-btn"
                                         onclick="compartirNoticia('{{ noticia.titulo|escapejs }}', '{{ noticia.enlace|default:''|escapejs }}', {{ noticia.id }})"
@@ -296,9 +301,22 @@
     </div>
 
     <!-- JS propio -->
+    <script>
+        // Exponer información mínima del usuario al frontend
+        {% if request.user.is_authenticated %}
+        window.CURRENT_USER_ROLE = "{{ request.user.profile.role }}";
+        window.IS_AUTH = true;
+        window.IS_STAFF = {% if request.user.is_staff %}true{% else %}false{% endif %};
+        {% else %}
+        window.CURRENT_USER_ROLE = "anonymous";
+        window.IS_AUTH = false;
+        window.IS_STAFF = false;
+        {% endif %}
+    </script>
     <script type="module" src="{% static 'js/app.js' %}"></script>
     {% block extra_js %}{% endblock %}
     {% include 'includes/icon_user.html' %}
     {% include 'includes/update.html' %}
+    <script src="{% static 'analisis/js/analisis.js' %}"></script>
 </body>
 </html>

@@ -23,6 +23,9 @@
                     <a href="{% url 'bienvenida' %}" class="nav-link">Inicio</a>
                     <a href="{% url 'lista_noticias' %}" class="nav-link">Noticias</a>
                     <a href="{% url 'profile' %}" class="nav-link">Mi Perfil</a>
+                    {% if user.profile.role == 'premium' %}
+                        <a href="{% url 'mis_analisis' %}" class="nav-link">Analisis</a>
+                    {% endif %}
                     <a href="{% url 'logout' %}" class="nav-link">Cerrar Sesión</a>
                 {% else %}
                     <a href="{% url 'login' %}" class="nav-link">Iniciar Sesión</a>
@@ -97,5 +100,17 @@
             <p>&copy; 2025 NewsMiner. Todos los derechos reservados.</p>
         </div>
     </footer>
+    <script>
+        // Exponer información mínima del usuario al frontend (para comportamiento de botones)
+        {% if request.user.is_authenticated %}
+        window.CURRENT_USER_ROLE = "{{ request.user.profile.role }}";
+        window.IS_AUTH = true;
+        window.IS_STAFF = {% if request.user.is_staff %}true{% else %}false{% endif %};
+        {% else %}
+        window.CURRENT_USER_ROLE = "anonymous";
+        window.IS_AUTH = false;
+        window.IS_STAFF = false;
+        {% endif %}
+    </script>
 </body>
 </html>

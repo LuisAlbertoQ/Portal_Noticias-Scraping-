@@ -8,6 +8,7 @@ from django.contrib import messages
 from scraping.models import Noticia, NoticiasVistas
 from accounts.utils import registrar_login
 from .models import Actividad
+from analisis.models import AnalisisNoticia
 
 from .forms import RegistroForm
 
@@ -101,6 +102,12 @@ def profile(request):
     noticias_vistas_count = NoticiasVistas.objects.filter(usuario=request.user).count()
     dias_activo = request.user.profile.dias_activo()
     
+    # Obtener los análisis del usuario
+    analisis_count = AnalisisNoticia.objects.filter(usuario=request.user).count()
+    analisis_recientes = AnalisisNoticia.objects.filter(
+        usuario=request.user
+    ).select_related('noticia').order_by('-creado_en')[:5]  # Últimos 5 análisis
+    
     # Obtener actividades recientes (últimas 10)
     actividades_recientes = Actividad.objects.filter(
         usuario=request.user
@@ -123,6 +130,8 @@ def profile(request):
         'actividades_recientes': actividades_recientes,
         'es_usuario_nuevo': request.user.profile.es_usuario_nuevo(),
         'is_premium': is_premium,
+        'analisis_count': analisis_count,
+        'analisis_recientes': analisis_recientes,
     })
 
 @login_required

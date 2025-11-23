@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Análisis - NewsMiner</title>
+    
+    <!-- Font Awesome -->
+    <script src="https://kit.fontawesome.com/de7c7ab7a7.js" crossorigin="anonymous"></script>
+    
+    <!-- CSS principal -->
+    <link rel="stylesheet" href="{% static 'analisis/css/mis_analisis.css' %}">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="navbar">
+            <a href="{% url 'bienvenida' %}" class="navbar-brand">NewsMiner</a>
+            <div class="navbar-nav">
+                <a href="{% url 'bienvenida' %}" class="nav-link">Inicio</a>
+                <a href="{% url 'lista_noticias' %}" class="nav-link">Noticias</a>
+                <a href="{% url 'profile' %}" class="nav-link">Mi Perfil</a>
+                <a href="{% url 'logout' %}" class="nav-link">Cerrar Sesión</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Contenido principal -->
+    <main class="container">
+        <!-- Header de la página -->
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-chart-line me-2"></i> Mis Análisis
+            </h1>
+            <div class="page-actions">
+                <a href="{% url 'lista_noticias' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nuevo Análisis
+                </a>
+                <a href="{% url 'profile' %}" class="btn btn-outline">
+                    <i class="fas fa-arrow-left"></i> Volver al Perfil
+                </a>
+            </div>
+        </div>
+
+        <!-- Estadísticas rápidas -->
+        <div class="quick-stats">
+            <div class="stat-card">
+                <div class="stat-icon success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-number">{{ completado_count|default:0 }}</span>
+                    <span class="stat-label">Completados</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon warning">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-number">{{ proceso_count|default:0 }}</span>
+                    <span class="stat-label">En Proceso</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-number">{{ error_count|default:0 }}</span>
+                    <span class="stat-label">Con Error</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros y vista -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="filter-buttons">
+                <button class="btn btn-sm btn-outline filter-btn active" data-filter="all">
+                    Todos ({{ total_analisis }})
+                </button>
+                <button class="btn btn-sm btn-outline filter-btn" data-filter="completed">
+                    Completados ({{ completado_count }})
+                </button>
+                <button class="btn btn-sm btn-outline filter-btn" data-filter="processing">
+                    En Proceso ({{ proceso_count }})
+                </button>
+                <button class="btn btn-sm btn-outline filter-btn" data-filter="error">
+                    Con Error ({{ error_count }})
+                </button>
+            </div>
+            <div class="view-toggle">
+                <button class="btn btn-sm btn-outline view-toggle-btn active" data-view="grid">
+                    <i class="fas fa-th"></i>
+                </button>
+                <button class="btn btn-sm btn-outline view-toggle-btn" data-view="list">
+                    <i class="fas fa-list"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Grid de análisis -->
+        <div class="analisis-grid">
+            {% for analisis in page_obj %}
+            <div class="analisis-card" data-status="{% if analisis.estado == 'completado' %}completed{% elif analisis.estado == 'en_proceso' %}processing{% else %}error{% endif %}" style="animation-delay: {{ forloop.counter0 }}00ms">
+                <!-- Header -->
+                <div class="analisis-header">
+                    <div class="analisis-status">
+                        {% if analisis.estado == 'completado' %}
+                        <span class="status-badge completed">
+                            <i class="fas fa-check-circle"></i> Completado
+                        </span>
+                        {% elif analisis.estado == 'en_proceso' %}
+                        <span class="status-badge processing">
+                            <i class="fas fa-spinner fa-spin"></i> En Proceso
+                        </span>
+                        {% else %}
+                        <span class="status-badge error">
+                            <i class="fas fa-exclamation-circle"></i> Error
+                        </span>
+                        {% endif %}
+                    </div>
+                    <h3 class="analisis-title">
+                        <a href="{{ analisis.noticia.enlace }}" target="_blank">
+                            {{ analisis.noticia.titulo|truncatechars:80 }}
+                        </a>
+                    </h3>
+                    <div class="analisis-meta">
+                        <div class="analisis-meta-item">
+                            <i class="fas fa-newspaper"></i>
+                            <span>{{ analisis.noticia.origen }}</span>
+                        </div>
+                        <div class="analisis-meta-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>{{ analisis.creado_en|date:"d/m/Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Body -->
+                <div class="analisis-body">
+                    {% if analisis.estado == 'completado' %}
+                    <div class="analisis-tags">
+                        {% if analisis.categoria %}
+                        <span class="tag category">{{ analisis.categoria }}</span>
+                        {% endif %}
+                        {% if analisis.sentimiento %}
+                        <span class="tag sentiment {{ analisis.sentimiento }}">
+                            {{ analisis.sentimiento|title }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    {% if analisis.estado == 'completado' and analisis.resumen %}
+                    <div class="analisis-summary">
+                        <h5>Resumen</h5>
+                        <p>{{ analisis.resumen|truncatechars:150 }}</p>
+                    </div>
+                    {% elif analisis.estado == 'en_proceso' %}
+                    <div class="analisis-summary">
+                        <p>El análisis está siendo procesado. Esto puede tardar unos minutos...</p>
+                    </div>
+                    {% else %}
+                    <div class="analisis-summary">
+                        <p>Hubo un error al procesar este análisis. Puedes intentarlo de nuevo.</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Footer -->
+                <div class="analisis-footer">
+                    <div class="analisis-cost">
+                        {% if analisis.tokens_usados %}
+                        <span><i class="fas fa-microchip"></i> {{ analisis.tokens_usados }} tokens</span>
+                        {% endif %}
+                        {% if analisis.coste_estimado %}
+                        <span><i class="fas fa-dollar-sign"></i> ${{ analisis.coste_estimado }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="analisis-actions">
+                        {% if analisis.estado == 'completado' %}
+                        <a href="{% url 'analisis_resultado' analisis.id %}" class="btn btn-primary btn-sm" target="_blank">
+                            <i class="fas fa-eye"></i> Ver
+                        </a>
+                        {% elif analisis.estado == 'en_proceso' %}
+                        <button class="btn btn-outline btn-sm" disabled>
+                            <i class="fas fa-spinner fa-spin"></i> Procesando
+                        </button>
+                        {% else %}
+                        <a href="{% url 'analisis_lista' %}" class="btn btn-outline btn-sm">
+                            <i class="fas fa-redo"></i> Reintentar
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h2 class="empty-state-title">Aún no tienes análisis</h2>
+                <p class="empty-state-description">
+                    Comienza a analizar noticias para verlas aquí. Solo los usuarios Premium pueden realizar análisis de noticias.
+                </p>
+                <a href="{% url 'analisis_lista' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Realizar mi primer análisis
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Paginación -->
+        {% if page_obj.has_other_pages %}
+        <div class="pagination-container">
+            <nav aria-label="Paginación de análisis">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1" aria-label="Primera">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Anterior">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Siguiente">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Última">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>NewsMiner</h3>
+                <p>Explora las últimas noticias de El Comercio y Perú21</p>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Enlaces</h3>
+                <div class="footer-links">
+                    <a href="{% url 'bienvenida' %}" class="footer-link">Inicio</a>
+                    <a href="{% url 'lista_noticias' %}" class="footer-link">Noticias</a>
+                </div>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Cuenta</h3>
+                <div class="footer-links">
+                    <a href="{% url 'profile' %}" class="footer-link">Mi Perfil</a>
+                    <a href="{% url 'logout' %}" class="footer-link">Cerrar Sesión</a>
+                </div>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Fuentes</h3>
+                <div class="footer-links">
+                    <a href="https://elcomercio.pe/" class="footer-link">El Comercio</a>
+                    <a href="https://peru21.pe/" class="footer-link">Perú21</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2025 NewsMiner. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="{% static 'analisis/js/mis_analisis.js' %}"></script>
+</body>
+</html>

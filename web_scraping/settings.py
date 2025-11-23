@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-c3!ux+pi2%=z^sp6us)41w85u=2vhl1wfkw5v%m07n(h6k4a52
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'scraping',
+    'analisis',
     'accounts',
 ]
 
@@ -162,3 +163,34 @@ LOGIN_URL = '/accounts/login/'
 SESSION_COOKIE_AGE = 3600  # 1 hora
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+OPENROUTER_API_KEY = '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'
+OPENROUTER_MODEL = 'openai/gpt-3.5-turbo'  # Prefijo 'openai/' es clave
+OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': 'debug.log',
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'analisis': {
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'scraping': {
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+        },
+    },
+}

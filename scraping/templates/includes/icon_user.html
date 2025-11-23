@@ -11,6 +11,9 @@
     <a href="{% url 'profile' %}" class="fab-item" title="Ver perfil">
       <i class="fas fa-user"></i>
     </a>
+    <a href="{% url 'mis_analisis' %}" id="mis-analisis-link" class="fab-item" title="Ver Analisis">
+      <i class="fas fa-chart-simple"></i>
+    </a>
     <form method="post" action="{% url 'logout' %}" class="fab-item-form">
       {% csrf_token %}
       <button type="submit" class="fab-item" title="Cerrar sesión">
@@ -19,3 +22,52 @@
     </form>
   </div>
 </div>
+  <script>
+  document.addEventListener('DOMContentLoaded', function(){
+    try{
+      const link = document.getElementById('mis-analisis-link');
+      if(!link) return;
+
+      link.addEventListener('click', function(e){
+        try{
+          // Si no está autenticado, redirigir al login con next
+          if(!window.IS_AUTH){
+            e.preventDefault();
+            const next = encodeURIComponent(link.getAttribute('href') + window.location.search);
+            window.location.href = `/accounts/login/?next=${next}`;
+            return;
+          }
+
+          const role = (window.CURRENT_USER_ROLE || 'anonymous').toString();
+          const isStaff = !!window.IS_STAFF;
+
+          // Si no es premium ni admin ni staff, mostrar notificación y modal
+          if(role !== 'premium' && role !== 'admin' && !isStaff){
+            e.preventDefault();
+
+            // Notificación con fallbacks
+            const notify = (msg, type='info') => {
+              try{ if(typeof showNotification === 'function'){ showNotification(msg, type); return; } }catch(e){}
+              try{ if(window.notificationSystem && typeof window.notificationSystem.show === 'function'){ window.notificationSystem.show(msg, type); return; } }catch(e){}
+              try{ alert(msg); }catch(e){ console.log('Notify:', msg); }
+            };
+
+            notify('Para ver tus análisis necesitas una cuenta Premium.', 'warning');
+
+            // Abrir modal de upgrade si está disponible
+            if(typeof window.showUpgradeModal === 'function'){
+              window.showUpgradeModal();
+            } else {
+              // alternativa: redirigir a planes
+              // window.location.href = '/accounts/planes/';
+            }
+          }
+
+        }catch(err){
+          console.warn('Error manejando click en mis_analisis:', err);
+        }
+      });
+
+    }catch(err){ console.warn('icon_user script error', err); }
+  });
+  </script>

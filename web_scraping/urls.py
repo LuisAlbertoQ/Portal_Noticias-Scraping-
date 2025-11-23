@@ -12,5 +12,7 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('noticias/', include('scraping.urls')),
     
+    path('analisis/', include('analisis.urls')),
+    
 
 ] + static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])

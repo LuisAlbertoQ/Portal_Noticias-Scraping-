@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'analisis_lista' %}">Análisis</a></li>
+            <li class="breadcrumb-item active">Resultado #{{ analisis.id }}</li>
+        </ol>
+    </nav>
+    
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h3><i class="fas fa-newspaper"></i> {{ noticia.titulo }}</h3>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <strong><i class="fas fa-user"></i> Autor:</strong> {{ noticia.autor|default:"N/A" }}<br>
+                    <strong><i class="fas fa-calendar"></i> Fecha:</strong> {{ noticia.fecha|date:"d/m/Y H:i" }}<br>
+                    <strong><i class="fas fa-link"></i> Origen:</strong> <a href="{{ noticia.enlace }}" target="_blank">{{ noticia.origen }}</a>
+                </div>
+                <div class="col-md-6 text-right">
+                    <span class="badge badge-info">
+                        <i class="fas fa-cog"></i> Tokens: {{ analisis.tokens_usados }}
+                    </span>
+                    <span class="badge badge-light">
+                        <i class="fas fa-dollar-sign"></i> Coste: ${{ analisis.coste_estimado }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Resumen -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4><i class="fas fa-file-alt"></i> Resumen Ejecutivo</h4>
+        </div>
+        <div class="card-body">
+            <p class="lead">{{ analisis.resumen|linebreaks }}</p>
+        </div>
+    </div>
+    
+    <!-- Análisis -->
+    <div class="row">
+        <!-- Sentimiento -->
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5><i class="fas fa-heart"></i> Sentimiento</h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="display-4 {{ analisis.get_sentimiento_color }}">
+                        <i class="fas fa-{{ analisis.sentimiento|yesno:'smile,meh,frown' }}"></i>
+                    </div>
+                    <p class="mt-2">
+                        <strong>{{ analisis.sentimiento|title }}</strong><br>
+                        <small>Confianza: {{ analisis.sentimiento_confianza|floatformat:1 }}%</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Categoría -->
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5><i class="fas fa-tag"></i> Categoría</h5>
+                </div>
+                <div class="card-body">
+                    <span class="badge badge-primary" style="font-size: 1.2em;">
+                        {{ analisis.categoria }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Entidades -->
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5><i class="fas fa-users"></i> Entidades ({{ analisis.get_entidades_count }})</h5>
+                </div>
+                <div class="card-body">
+                    {% for tipo, entidades in analisis.entidades.items %}
+                        {% if entidades %}
+                        <h6 class="text-muted">{{ tipo }}:</h6>
+                        {% for entidad in entidades %}
+                            <span class="badge badge-secondary mr-1 mb-1">{{ entidad }}</span>
+                        {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Palabras Clave -->
+    <div class="card mt-3">
+        <div class="card-header">
+            <h5><i class="fas fa-key"></i> Palabras Clave</h5>
+        </div>
+        <div class="card-body">
+            {% for palabra in analisis.palabras_clave %}
+                <span class="badge badge-info mr-2 mb-2" style="font-size: 0.9em;">#{{ palabra }}</span>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

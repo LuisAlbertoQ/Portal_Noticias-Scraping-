@@ -28,8 +28,8 @@
                         <span class="stat-label">Noticias vistas</span>
                     </div>
                     <div class="stat-card">
-                        <span class="stat-number secondary">47</span>
-                        <span class="stat-label">Favoritos guardados</span>
+                        <span class="stat-number secondary">{{ analisis_count|default:0 }}</span>
+                        <span class="stat-label">Análisis realizados</span>
                     </div>
                     <div class="stat-card">
                         <span class="stat-number success">{{ dias_activo|default:1 }}</span>
@@ -176,6 +176,67 @@
                         </div>
                     </div>
                     {% endfor %}
+                </div>
+                <!-- Análisis Recientes -->
+                <div class="recent-analysis">
+                    <h3><i class="fas fa-chart-line me-2"></i>Mis Análisis Recientes</h3>
+                    
+                    {% for analisis in analisis_recientes %}
+                    <div class="analysis-item">
+                        <div class="analysis-icon">
+                            {% if analisis.estado == 'completado' %}
+                                <i class="fas fa-check-circle" style="color: var(--success-color);"></i>
+                            {% elif analisis.estado == 'en_proceso' %}
+                                <i class="fas fa-spinner fa-spin" style="color: var(--secondary-color);"></i>
+                            {% else %}
+                                <i class="fas fa-exclamation-circle" style="color: var(--danger-color);"></i>
+                            {% endif %}
+                        </div>
+                        <div class="analysis-content">
+                            <div class="analysis-text">{{ analisis.noticia.titulo|truncatechars:80 }}</div>
+                            <div class="analysis-meta">
+                                <span class="analysis-date">{{ analisis.creado_en|date:"d/m/Y H:i" }}</span>
+                                <span class="analysis-status">
+                                    {% if analisis.estado == 'completado' %}
+                                        <span class="badge badge-success">Completado</span>
+                                    {% elif analisis.estado == 'en_proceso' %}
+                                        <span class="badge badge-warning">En proceso</span>
+                                    {% else %}
+                                        <span class="badge badge-danger">Error</span>
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="analysis-action">
+                            {% if analisis.estado == 'completado' %}
+                                <a href="{% url 'analisis_resultado' analisis.id %}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-eye"></i> Ver
+                                </a>
+                            {% elif analisis.estado == 'en_proceso' %}
+                                <button class="btn btn-sm btn-secondary" disabled>
+                                    <i class="fas fa-spinner fa-spin"></i> Procesando
+                                </button>
+                            {% else %}
+                                <a href="{% url 'analisis_lista' %}" class="btn btn-sm btn-warning">
+                                    <i class="fas fa-redo"></i> Reintentar
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="analysis-item">
+                        <div class="analysis-content">
+                            <div class="analysis-text">Aún no has realizado ningún análisis de noticias</div>
+                            <div class="analysis-date">Tu análisis aparecerán aquí</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    <div class="text-center mt-3">
+                        <a href="{% url 'mis_analisis' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-list"></i> Ver todos mis análisis
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
