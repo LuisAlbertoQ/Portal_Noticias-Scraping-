@@ -1,0 +1,81 @@
+@import url(variables.css);
+/* Usar variables definidas en variables.css. Se eliminó :root duplicado. */
+body {
+    background: var(--primary-gradient);
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    color: var(--text-color);
+}
+
+.main-container, .container {
+    background: var(--bg-white);
+    border-radius: var(--border-radius-lg);
+    padding: 28px;
+    box-shadow: var(--shadow-medium);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.page-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:22px;
+}
+.title{font-size:1.5rem;margin:0;color:var(--text-color)}
+.actions{display:flex;gap:10px}
+.button{
+    display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;text-decoration:none;color:var(--text-light);font-size:0.9rem;transition:var(--transition);
+}
+.button.small{padding:6px 10px;font-size:0.85rem}
+.button.primary{background:var(--primary-color)}
+.button.secondary{background:var(--bg-dark)}
+.button:hover{opacity:0.95}
+
+.mb{margin-bottom:18px}
+.mt{margin-top:18px}
+
+.card{background:transparent;border-radius:var(--border-radius);overflow:hidden;border:1px solid rgba(0,0,0,0.06)}
+.card-header{background:transparent;padding:14px 18px;border-bottom:1px solid rgba(0,0,0,0.05)}
+.card-header h3,.card-header h4,.card-header h5{margin:0;font-size:1rem}
+.card-header.primary{background:var(--primary-color);color:var(--text-light)}
+.card-body{padding:18px}
+
+.grid{display:flex;flex-wrap:wrap;gap:16px}
+.cards{align-items:stretch}
+.col{box-sizing:border-box}
+.col.half{flex:1 1 48%}
+.col.third{flex:1 1 32%}
+.center{text-align:center}
+.align-right{text-align:right}
+
+.badge{display:inline-block;padding:6px 10px;border-radius:999px;font-size:0.85rem}
+.badge.info{background:var(--secondary-20);color:var(--text-color);border:1px solid var(--secondary-20)}
+.badge.light{background:var(--bg-light);color:var(--text-color);border:1px solid rgba(0,0,0,0.05)}
+.badge.primary{background:var(--primary-color);color:var(--text-light)}
+.badge.neutral{background:var(--bg-dark);color:var(--text-light)}
+.badge.large{padding:10px 18px;font-size:1rem}
+.header-badge{margin-left:8px}
+
+.sentimiento-icon{font-size:3rem;display:inline-block}
+.sentimiento-icon.positivo{color:var(--success-color)}
+.sentimiento-icon.negativo{color:var(--accent-color)}
+.sentimiento-icon.neutral{color:var(--neutral)}
+
+.entidad-badge{margin:4px;display:inline-block;padding:6px 10px;border-radius:6px;background:var(--bg-light);color:var(--text-color);font-size:0.85rem}
+
+.keyword-badge{font-size:0.9em;margin:6px;padding:8px 12px;display:inline-block;border-radius:999px;background:var(--secondary-color);color:var(--text-light)}
+.keywords{display:flex;flex-wrap:wrap;gap:8px}
+
+.muted{color:var(--text-muted)}
+.divider{border:none;height:1px;background:linear-gradient(90deg,rgba(0,0,0,0.06),rgba(0,0,0,0));margin:10px 0}
+.uppercase{text-transform:uppercase}
+
+.footer{margin-top:22px;text-align:center;color:var(--text-muted)}
+
+@media (max-width:900px){
+    .col.half,.col.third{flex:1 1 100%}
+    .page-header{flex-direction:column;align-items:flex-start;gap:10px}
+    .actions{width:100%;justify-content:flex-start}
+}

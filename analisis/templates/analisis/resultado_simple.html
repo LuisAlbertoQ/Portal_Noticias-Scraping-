@@ -1,77 +1,48 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Análisis IA: {{ noticia.titulo|truncatechars:50 }}</title>
     
-    <!-- Bootstrap CSS (opcional, para que se vea bonito) -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    <style>
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .container {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .header-badge {
-            font-size: 0.8em;
-            margin-left: 10px;
-        }
-        .sentimiento-icon {
-            font-size: 3em;
-        }
-        .entidad-badge {
-            margin: 2px;
-        }
-        .keyword-badge {
-            font-size: 0.9em;
-            margin: 3px;
-            padding: 8px 12px;
-        }
-    </style>
+    <!-- Iconos -->
+    <script src="https://kit.fontawesome.com/de7c7ab7a7.js" crossorigin="anonymous"></script>
+    <!-- CSS principal (sin Bootstrap) -->
+    <link rel="stylesheet" href="{% static 'analisis/css/resultado.css' %}">
 </head>
 <body>
-    <div class="container mt-4">
+    <div class="main-container">
         <!-- Header -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1><i class="fas fa-chart-line"></i> Análisis IA</h1>
-            <div>
-                <a href="{% url 'analisis_lista' %}" class="btn btn-secondary btn-sm">
-                    <i class="fas fa-arrow-left"></i> Volver a Análisis
+        <header class="page-header">
+            <h1 class="title"><i class="fas fa-chart-line"></i> Análisis IA</h1>
+            <div class="actions">
+                <a href="{% url 'mis_analisis' %}" class="button secondary small">
+                    <i class="fas fa-arrow-left"></i> Volver a Mis Análisis
                 </a>
-                <a href="{{ noticia.enlace }}" target="_blank" class="btn btn-primary btn-sm">
+                <a href="{{ noticia.enlace }}" target="_blank" class="button primary small">
                     <i class="fas fa-external-link-alt"></i> Ver Noticia Original
                 </a>
             </div>
-        </div>
+        </header>
 
         <!-- Info de la noticia -->
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
+        <div class="card mb">
+            <div class="card-header primary">
                 <h3><i class="fas fa-newspaper"></i> {{ noticia.titulo }}</h3>
             </div>
             <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
+                <div class="grid">
+                    <div class="col half">
                         <p><strong><i class="fas fa-user"></i> Autor:</strong> {{ noticia.autor|default:"N/A" }}</p>
                         <p><strong><i class="fas fa-calendar"></i> Fecha:</strong> {{ noticia.fecha|date:"d/m/Y H:i" }}</p>
                         <p><strong><i class="fas fa-link"></i> Origen:</strong> {{ noticia.origen|upper }}</p>
                     </div>
-                    <div class="col-md-6 text-md-end">
-                        <span class="badge bg-info header-badge">
+                    <div class="col half align-right">
+                        <span class="badge info header-badge">
                             <i class="fas fa-cog"></i> Tokens: {{ analisis.tokens_usados }}
                         </span>
-                        <span class="badge bg-light text-dark header-badge">
+                        <span class="badge light header-badge">
                             <i class="fas fa-dollar-sign"></i> Coste: ${{ analisis.coste_estimado }}
                         </span>
                     </div>
@@ -80,7 +51,7 @@
         </div>
 
         <!-- Resumen -->
-        <div class="card mb-4">
+        <div class="card mb">
             <div class="card-header">
                 <h4><i class="fas fa-file-alt"></i> Resumen Ejecutivo</h4>
             </div>
@@ -90,10 +61,10 @@
         </div>
 
         <!-- Análisis en cards -->
-        <div class="row">
+        <div class="grid cards">
             <!-- Sentimiento -->
-            <div class="col-md-4 mb-3">
-                <div class="card h-100 text-center">
+            <div class="col third">
+                <div class="card center">
                     <div class="card-header">
                         <h5><i class="fas fa-heart"></i> Sentimiento</h5>
                     </div>
@@ -102,7 +73,7 @@
                             <i class="fas fa-{{ analisis.sentimiento|yesno:'smile,meh,frown' }}"></i>
                         </div>
                         <p class="mt-2">
-                            <strong class="text-uppercase">{{ analisis.sentimiento }}</strong><br>
+                            <strong class="uppercase">{{ analisis.sentimiento }}</strong><br>
                             <small>Confianza: {{ analisis.sentimiento_confianza|floatformat:1 }}%</small>
                         </p>
                     </div>
@@ -110,13 +81,13 @@
             </div>
 
             <!-- Categoría -->
-            <div class="col-md-4 mb-3">
-                <div class="card h-100 text-center">
+            <div class="col third">
+                <div class="card center">
                     <div class="card-header">
                         <h5><i class="fas fa-tag"></i> Categoría</h5>
                     </div>
                     <div class="card-body">
-                        <span class="badge bg-primary" style="font-size: 1.2em;">
+                        <span class="badge primary large">
                             {{ analisis.categoria }}
                         </span>
                     </div>
@@ -124,19 +95,19 @@
             </div>
 
             <!-- Entidades -->
-            <div class="col-md-4 mb-3">
-                <div class="card h-100">
+            <div class="col third">
+                <div class="card">
                     <div class="card-header">
                         <h5><i class="fas fa-users"></i> Entidades ({{ analisis.get_entidades_count }})</h5>
                     </div>
                     <div class="card-body">
                         {% for tipo, entidades in analisis.entidades.items %}
                             {% if entidades %}
-                                <h6 class="text-muted small">{{ tipo }}:</h6>
+                                <h6 class="muted small">{{ tipo }}:</h6>
                                 {% for entidad in entidades %}
-                                    <span class="badge bg-secondary entidad-badge">{{ entidad }}</span>
+                                    <span class="badge neutral entidad-badge">{{ entidad }}</span>
                                 {% endfor %}
-                                <hr class="my-2">
+                                <hr class="divider">
                             {% endif %}
                         {% endfor %}
                     </div>
@@ -145,21 +116,23 @@
         </div>
 
         <!-- Palabras Clave -->
-        <div class="card mt-3">
+        <div class="card mt">
             <div class="card-header">
                 <h5><i class="fas fa-key"></i> Palabras Clave</h5>
             </div>
             <div class="card-body">
+                <div class="keywords">
                 {% for palabra in analisis.palabras_clave %}
-                    <span class="badge bg-info keyword-badge">#{{ palabra }}</span>
+                    <span class="badge info keyword-badge">#{{ palabra }}</span>
                 {% endfor %}
+                </div>
             </div>
         </div>
 
         <!-- Footer -->
-        <div class="text-center mt-4 text-muted">
+        <footer class="footer">
             <small>Generado el {{ analisis.creado_en|date:"d/m/Y H:i" }} | ID Análisis: #{{ analisis.id }}</small>
-        </div>
+        </footer>
     </div>
 
     <!-- Bootstrap JS (opcional) -->

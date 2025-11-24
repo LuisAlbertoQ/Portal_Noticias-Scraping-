@@ -1,0 +1,45 @@
+/* ===== VARIABLES CSS - COLORES Y TOKENS DE DISEÑO ===== */
+:root {
+    /* Colores principales - basados en la imagen (celeste y verde) */
+    --primary-color: #3498db;
+    --secondary-color: #3498db;
+    --accent-color: #e74c3c;
+    --success-color: #2ecc71;
+    
+    /* Colores de texto */
+    --text-color: #2c3e50;
+    --text-muted: #7f8c8d;
+    --text-light: #ffffff;
+    
+    /* Colores de fondo */
+    --bg-light: #f8f9fa;
+    --bg-white: #ffffff;
+    --bg-primary: #1abc9c;
+    --bg-dark: #2c3e50;
+    
+    /* Gradientes - celeste con verde como en la imagen */
+    --primary-gradient: linear-gradient(135deg, #3498db 0%, #1abc9c 100%);
+    --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    
+    /* Variantes de colores */
+    --dark-primary: #16a085;
+    --light-primary: #d1f2eb;
+    
+    /* Variantes translúcidas */
+    --primary-10: rgba(26, 188, 156, 0.1);
+    --primary-20: rgba(26, 188, 156, 0.2);
+    --secondary-10: rgba(52, 152, 219, 0.1);
+    --secondary-20: rgba(52, 152, 219, 0.2);
+    --accent-10: rgba(231, 76, 60, 0.1);
+    --accent-20: rgba(231, 76, 60, 0.2);
+    
+    /* Sombras */
+    --shadow-light: 0 1px 3px rgba(52, 152, 219, 0.1);
+    --shadow-medium: 0 4px 6px rgba(52, 152, 219, 0.15);
+    --shadow-heavy: 0 8px 10px rgba(52, 152, 219, 0.2);
+    
+    /* Diseño */
+    --border-radius: 8px;
+    --border-radius-lg: 12px;
+    --transition: all 0.3s ease;
+}
