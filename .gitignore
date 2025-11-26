@@ -2,6 +2,11 @@
 # Entorno virtual de Python
 env/
 
+# Variables de entorno
+.env
+.env.local
+.env.*.local
+
 # Archivos de configuración y dependencias
 *.pyc
 __pycache__/

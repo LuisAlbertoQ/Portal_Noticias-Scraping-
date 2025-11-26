@@ -10,7 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Cargar variables de entorno desde .env
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +25,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-c3!ux+pi2%=z^sp6us)41w85u=2vhl1wfkw5v%m07n(h6k4a52'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-c3!ux+pi2%=z^sp6us)41w85u=2vhl1wfkw5v%m07n(h6k4a52')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 
 
 # Application definition
@@ -77,12 +82,12 @@ WSGI_APPLICATION = 'web_scraping.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'elcomercio_db',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.mysql'),
+        'NAME': os.getenv('DB_NAME', 'elcomercio_db'),
+        'USER': os.getenv('DB_USER', 'root'),
+        'PASSWORD': os.getenv('DB_PASSWORD', ''),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '3306'),
         'OPTIONS': {
             'sql_mode': 'traditional',
             'charset': 'utf8mb4',
@@ -114,13 +119,13 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'es-PE'
+LANGUAGE_CODE = os.getenv('LANGUAGE_CODE', 'es-PE')
 
-TIME_ZONE = "America/Lima"
+TIME_ZONE = os.getenv('TIME_ZONE', 'America/Lima')
 
-USE_I18N = True
+USE_I18N = os.getenv('USE_I18N', 'True') == 'True'
 
-USE_TZ = True
+USE_TZ = os.getenv('USE_TZ', 'True') == 'True'
 
 
 # Static files (CSS, JavaScript, Images)
@@ -138,9 +143,9 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Celery
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
-CELERY_TIMEZONE = 'America/Lima'          # tu zona horaria
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
+CELERY_TIMEZONE = os.getenv('CELERY_TIMEZONE', 'America/Lima')
 
 CELERY_BEAT_SCHEDULE = {
     'scrape-all-every-5-hours': {
@@ -154,19 +159,19 @@ CELERY_BEAT_SCHEDULE_FILENAME = 'celerybeat-schedule'
 CELERY_BEAT_SCHEDULER = 'celery.beat:PersistentScheduler'
 
 # Redirecciones después de login/logout
-LOGIN_REDIRECT_URL = 'lista_noticias'  # Cambié esto para que coincida con tu vista
-LOGOUT_REDIRECT_URL = 'bienvenida'     # Cambié para usar el nombre de la URL
+LOGIN_REDIRECT_URL = os.getenv('LOGIN_REDIRECT_URL', 'lista_noticias')
+LOGOUT_REDIRECT_URL = os.getenv('LOGOUT_REDIRECT_URL', 'bienvenida')
 
 # Para proteger las vistas de scraping
-LOGIN_URL = '/accounts/login/'
+LOGIN_URL = os.getenv('LOGIN_URL', '/accounts/login/')
 
-SESSION_COOKIE_AGE = 3600  # 1 hora
-SESSION_SAVE_EVERY_REQUEST = True
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_AGE = int(os.getenv('SESSION_COOKIE_AGE', '3600'))
+SESSION_SAVE_EVERY_REQUEST = os.getenv('SESSION_SAVE_EVERY_REQUEST', 'True') == 'True'
+SESSION_EXPIRE_AT_BROWSER_CLOSE = os.getenv('SESSION_EXPIRE_AT_BROWSER_CLOSE', 'True') == 'True'
 
-OPENROUTER_API_KEY = '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'
-OPENROUTER_MODEL = 'openai/gpt-3.5-turbo'  # Prefijo 'openai/' es clave
-OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1'
+OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY', '')
+OPENROUTER_MODEL = os.getenv('OPENROUTER_MODEL', 'openai/gpt-3.5-turbo')
+OPENROUTER_BASE_URL = os.getenv('OPENROUTER_BASE_URL', 'https://openrouter.ai/api/v1')
 
 LOGGING = {
     'version': 1,
